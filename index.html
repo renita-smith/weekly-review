@@ -1474,10 +1474,10 @@
     async function init() {
         buildHabitDots();
         try {
-            const [projects, tasks, notes] = await Promise.all([
-  notionQuery(DB_PROJECTS, { property:'Status', status:{ does_not_equal:'Done' } }),
-  notionQuery(DB_TASKS,    { property:'Status', status:{ does_not_equal:'Done' } }),
-  notionQuery(DB_NOTES,    {}),
+           const [projects, tasks, notes] = await Promise.all([
+  notionQuery(DB_PROJECTS, null),
+  notionQuery(DB_TASKS,    null),
+  notionQuery(DB_NOTES,    null),
 ]);
             const projectMap = {};
             projects.forEach(p => {

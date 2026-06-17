@@ -1475,25 +1475,10 @@
         buildHabitDots();
         try {
             const [projects, tasks, notes] = await Promise.all([
-            notionQuery(DB_PROJECTS, {
-                property: 'Status',
-                status: {
-                    does_not_equal: 'Done'
-                }
-            }),
-            notionQuery(DB_TASKS, {
-                property: 'Status',
-                status: {
-                    does_not_equal: 'Done'
-                }
-            }),
-            notionQuery(DB_NOTES, {
-                property: 'Pillar',
-                relation: {
-                    is_empty: true
-                }
-            }),
-            ]);
+  notionQuery(DB_PROJECTS, { property:'Status', status:{ does_not_equal:'Done' } }),
+  notionQuery(DB_TASKS,    { property:'Status', status:{ does_not_equal:'Done' } }),
+  notionQuery(DB_NOTES,    {}),
+]);
             const projectMap = {};
             projects.forEach(p => {
                 projectMap[p.id] = getTitle(p);

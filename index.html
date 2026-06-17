@@ -123,6 +123,11 @@
         color: #0C447C;
     }
 
+    .pill-unknown {
+        background: #f0efe9;
+        color: #888;
+    }
+
     .pill-project {
         background: #f0efe9;
         color: #444;
@@ -584,7 +589,7 @@
 
     .jump-btn:hover {
         background: #f0efe9;
-    }/* Plan Ahead domain cards */
+    }
 
     .plan-grid {
         display: grid;
@@ -652,18 +657,36 @@
         border-color: rgba(0, 0, 0, 0.1);
     }
 
-    .plan-card textarea:focus {
-        border-color: rgba(0, 0, 0, 0.25);
-    }
-
     .plan-full {
         grid-column: 1/-1;
+    }
+
+    .loading {
+        color: #888;
+        font-size: 13px;
+        padding: 12px 0;
+        text-align: center;
+    }
+
+    .empty {
+        color: #bbb;
+        font-size: 13px;
+        padding: 12px 0;
+        text-align: center;
+    }
+
+    .error-msg {
+        color: #a32d2d;
+        font-size: 12px;
+        padding: 8px;
+        background: #fceded;
+        border-radius: 8px;
+        margin-bottom: 8px;
     }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
     <div class="header-row">
         <div>
             <h1>Weekly Review</h1>
@@ -672,7 +695,6 @@
         <button class="btn btn-reset" onclick="hardReset()">↺ Reset</button>
     </div>
 
-    <!-- Jump Nav -->
     <div class="jump-bar">
         <button class="jump-btn" onclick="document.getElementById('sec-inbox').scrollIntoView({behavior:'smooth'})">📥 Notes Inbox</button>
         <button class="jump-btn" onclick="document.getElementById('sec-undone').scrollIntoView({behavior:'smooth'})">⚠️ What Didn't Get Done</button>
@@ -681,72 +703,46 @@
         <button class="jump-btn" onclick="document.getElementById('sec-plan').scrollIntoView({behavior:'smooth'})">🎯 Plan Ahead</button>
     </div>
 
-    <!-- Metrics -->
     <div class="grid-5">
         <div class="metric">
             <p class="metric-label">Active projects</p>
-            <p class="metric-value">11</p>
+            <p class="metric-value" id="metric-projects">—</p>
         </div>
         <div class="metric">
             <p class="metric-label">Tasks · next 2 wks</p>
-            <p class="metric-value">14</p>
+            <p class="metric-value" id="metric-tasks">—</p>
         </div>
         <div class="metric">
             <p class="metric-label">Overdue tasks</p>
-            <p class="metric-value danger">2</p>
+            <p class="metric-value danger" id="metric-overdue">—</p>
         </div>
         <div class="metric">
             <p class="metric-label">Unprocessed notes</p>
-            <p class="metric-value">5</p>
+            <p class="metric-value" id="metric-notes">—</p>
         </div>
         <div class="metric">
             <p class="metric-label">Habit avg this week</p>
-            <p class="metric-value">71%</p>
+            <p class="metric-value">—</p>
         </div>
     </div>
 
-    <!-- Domains -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <p class="section-title" style="margin:0;">Domains</p>
         <div class="filter-bar" style="margin:0;">
-            <span class="time-pill active" data-time="week" onclick="toggleTime(this)">This Week</span>
-            <span class="time-pill" data-time="next" onclick="toggleTime(this)">Next Week</span>
-            <span class="time-pill" data-time="two" onclick="toggleTime(this)">Next Two Weeks</span>
+            <span class="time-pill active" onclick="toggleTime(this)">This Week</span>
+            <span class="time-pill" onclick="toggleTime(this)">Next Week</span>
+            <span class="time-pill" onclick="toggleTime(this)">Next Two Weeks</span>
         </div>
     </div>
     <div class="card" style="margin-bottom:1.5rem;">
-        <div class="dist-bar-wrap">
-            <div class="dist-seg" style="width:18%;background:#7F77DD;"></div>
-            <div class="dist-seg" style="width:27%;background:#1D9E75;"></div>
-            <div class="dist-seg" style="width:22%;background:#D85A30;"></div>
-            <div class="dist-seg" style="width:15%;background:#EF9F27;"></div>
-            <div class="dist-seg" style="width:18%;background:#378ADD;"></div>
+        <div class="dist-bar-wrap" id="dist-bar">
+            <div class="dist-seg" style="width:100%;background:#eee;"></div>
         </div>
-        <div class="dist-legend">
-            <div class="dist-item">
-                <div class="dist-dot" style="background:#7F77DD;"></div>
-                RCBS 18%
-            </div>
-            <div class="dist-item">
-                <div class="dist-dot" style="background:#1D9E75;"></div>
-                RWS 27%
-            </div>
-            <div class="dist-item">
-                <div class="dist-dot" style="background:#D85A30;"></div>
-                SM 22%
-            </div>
-            <div class="dist-item">
-                <div class="dist-dot" style="background:#EF9F27;"></div>
-                MTS 15%
-            </div>
-            <div class="dist-item">
-                <div class="dist-dot" style="background:#378ADD;"></div>
-                EPLC 18%
-            </div>
+        <div class="dist-legend" id="dist-legend">
+            <span class="loading">Loading domain data…</span>
         </div>
     </div>
 
-    <!-- Calendar -->
     <p class="section-title">Two-Week Outlook — Calendar</p>
     <div class="card" style="margin-bottom:1.5rem;">
         <p class="week-divider" id="week1Label">Week 1</p>
@@ -756,44 +752,36 @@
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Mon</p>
-                <div class="cal-event ev-eplc">Curriculum mtg</div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Tue</p>
-                <div class="cal-event ev-rws">Client call</div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Wed</p>
-                <div class="cal-event ev-sm">Sent Miami</div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Thu</p>
-                <div class="cal-event ev-mts">MTS check-in</div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Fri</p>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Sat</p>
-                <div class="cal-event ev-personal">Weekly review</div>
             </div>
         </div>
         <p class="week-divider" id="week2Label">Week 2</p>
         <div class="cal-week">
             <div class="cal-day">
                 <p class="cal-day-label">Sun</p>
-                <div class="cal-event ev-sm">Sunday service</div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Mon</p>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Tue</p>
-                <div class="cal-event ev-rws">Proposal due</div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Wed</p>
-                <div class="cal-event ev-eplc">PD session</div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Thu</p>
@@ -803,239 +791,47 @@
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Sat</p>
-                <div class="cal-event ev-personal">Weekly review</div>
             </div>
         </div>
+        <p style="font-size:12px;color:#bbb;text-align:center;margin-top:8px;">Calendar integration coming in next phase</p>
     </div>
 
-    <!-- Filters -->
     <p class="section-title">Filter By Domain</p>
     <div class="filter-bar" id="filterBar" style="margin-bottom:6px;">
-        <span class="domain-pill pill-rcbs" data-domain="rcbs" onclick="toggleDomain('rcbs')">RCBS</span>
-        <span class="domain-pill pill-rws" data-domain="rws" onclick="toggleDomain('rws')">RWS</span>
-        <span class="domain-pill pill-sm" data-domain="sm" onclick="toggleDomain('sm')">SM</span>
-        <span class="domain-pill pill-mts" data-domain="mts" onclick="toggleDomain('mts')">MTS</span>
-        <span class="domain-pill pill-eplc" data-domain="eplc" onclick="toggleDomain('eplc')">EPLC</span>
+        <span class="domain-pill pill-rcbs" data-domain="RCBS" onclick="toggleDomain('RCBS')">RCBS</span>
+        <span class="domain-pill pill-rws" data-domain="RWS" onclick="toggleDomain('RWS')">RWS</span>
+        <span class="domain-pill pill-sm" data-domain="SM" onclick="toggleDomain('SM')">SM</span>
+        <span class="domain-pill pill-mts" data-domain="MTS" onclick="toggleDomain('MTS')">MTS</span>
+        <span class="domain-pill pill-eplc" data-domain="EPLC" onclick="toggleDomain('EPLC')">EPLC</span>
         <span class="clear-filter" onclick="clearFilters()">Clear</span>
     </div>
     <p class="section-title" style="margin-top:8px;">Filter By Project</p>
     <div class="filter-bar" id="projectBar" style="margin-bottom:1.5rem;">
-        <span class="pill-project" data-project="dashboard" onclick="toggleProject('dashboard')">Dashboard Build</span>
-        <span class="pill-project" data-project="dwell" onclick="toggleProject('dwell')">dWell Follow Up</span>
-        <span class="pill-project" data-project="sentmiami" onclick="toggleProject('sentmiami')">Sent Miami Curriculum</span>
-        <span class="pill-project" data-project="eplcsys" onclick="toggleProject('eplcsys')">EPLC Classroom Systems</span>
-        <span class="pill-project" data-project="health" onclick="toggleProject('health')">Personal Health Reset</span>
-        <span class="pill-project" data-project="mtsq3" onclick="toggleProject('mtsq3')">MTS Q3 Deliverables</span>
-        <span class="clear-filter" onclick="clearFilters()">Clear</span>
+        <span class="loading">Loading projects…</span>
     </div>
 
-    <!-- Projects + Tasks -->
     <div class="grid-2">
         <div>
             <p class="section-title">Active Projects — Set Priorities</p>
-            <div class="card">
-                <div class="project-row" data-domain="rws" data-project="dashboard">
-                    <span class="star star-on" onclick="toggleStar(this)">★</span>
-                    <span class="project-name">Dashboard side hustle build</span>
-                    <span class="domain-pill pill-rws" style="cursor:default;font-size:11px;padding:2px 8px;">RWS</span>
-                </div>
-                <div class="progress-wrap">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width:60%;background:#1D9E75;"></div>
-                    </div>
-                </div>
-                <div class="project-row" data-domain="sm" data-project="dwell">
-                    <span class="star star-on" onclick="toggleStar(this)">★</span>
-                    <span class="project-name">dWell post-conference follow up</span>
-                    <span class="domain-pill pill-sm" style="cursor:default;font-size:11px;padding:2px 8px;">SM</span>
-                </div>
-                <div class="progress-wrap">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width:80%;background:#D85A30;"></div>
-                    </div>
-                </div>
-                <div class="project-row" data-domain="sm" data-project="sentmiami">
-                    <span class="star star-off" onclick="toggleStar(this)">☆</span>
-                    <span class="project-name">Sent Miami curriculum — Range</span>
-                    <span class="domain-pill pill-sm" style="cursor:default;font-size:11px;padding:2px 8px;">SM</span>
-                </div>
-                <div class="progress-wrap">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width:40%;background:#D85A30;"></div>
-                    </div>
-                </div>
-                <div class="project-row" data-domain="eplc" data-project="eplcsys">
-                    <span class="star star-off" onclick="toggleStar(this)">☆</span>
-                    <span class="project-name">EPLC classroom systems</span>
-                    <span class="domain-pill pill-eplc" style="cursor:default;font-size:11px;padding:2px 8px;">EPLC</span>
-                </div>
-                <div class="progress-wrap">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width:20%;background:#378ADD;"></div>
-                    </div>
-                </div>
-                <div class="project-row" data-domain="rcbs" data-project="health">
-                    <span class="star star-off" onclick="toggleStar(this)">☆</span>
-                    <span class="project-name">Personal health reset</span>
-                    <span class="domain-pill pill-rcbs" style="cursor:default;font-size:11px;padding:2px 8px;">RCBS</span>
-                </div>
-                <div class="progress-wrap">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width:30%;background:#7F77DD;"></div>
-                    </div>
-                </div>
-                <div class="project-row" data-domain="mts" data-project="mtsq3">
-                    <span class="star star-off" onclick="toggleStar(this)">☆</span>
-                    <span class="project-name">MTS Q3 deliverables</span>
-                    <span class="domain-pill pill-mts" style="cursor:default;font-size:11px;padding:2px 8px;">MTS</span>
-                </div>
-                <div class="progress-wrap" style="padding-bottom:0;">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width:50%;background:#EF9F27;"></div>
-                    </div>
-                </div>
+            <div class="card" id="projects-list">
+                <p class="loading">Loading projects…</p>
             </div>
         </div>
-
         <div>
             <p class="section-title">Tasks — Next Two Weeks</p>
-            <div class="card">
-                <div class="task-row" data-domain="sm" data-project="dwell">
-                    <div class="task-check"></div>
-                    <div style="flex:1;">
-                        <p class="task-name">Send speaker thank-you notes</p>
-                        <p class="task-meta">
-                            Mon Jun 23 · 
-                            <span class="domain-pill pill-sm" style="cursor:default;font-size:11px;padding:1px 7px;">SM</span>
-                            <span class="pill-project" style="cursor:default;">dWell Follow Up</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="task-row" data-domain="rws" data-project="dashboard">
-                    <div class="task-check"></div>
-                    <div style="flex:1;">
-                        <p class="task-name">Finalize first client proposal</p>
-                        <p class="task-meta">
-                            Wed Jun 25 · 
-                            <span class="domain-pill pill-rws" style="cursor:default;font-size:11px;padding:1px 7px;">RWS</span>
-                            <span class="pill-project" style="cursor:default;">Dashboard Build</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="task-row" data-domain="mts" data-project="mtsq3">
-                    <div class="task-check"></div>
-                    <div style="flex:1;">
-                        <p class="task-name">Review MTS deliverables</p>
-                        <p class="task-meta">
-                            Thu Jun 26 · 
-                            <span class="domain-pill pill-mts" style="cursor:default;font-size:11px;padding:1px 7px;">MTS</span>
-                            <span class="pill-project" style="cursor:default;">MTS Q3 Deliverables</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="task-row" data-domain="eplc" data-project="eplcsys">
-                    <div class="task-check"></div>
-                    <div style="flex:1;">
-                        <p class="task-name">Set up classroom systems doc</p>
-                        <p class="task-meta">
-                            Fri Jun 27 · 
-                            <span class="domain-pill pill-eplc" style="cursor:default;font-size:11px;padding:1px 7px;">EPLC</span>
-                            <span class="pill-project" style="cursor:default;">EPLC Classroom Systems</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="task-row" data-domain="rws" data-project="dashboard">
-                    <div class="task-check"></div>
-                    <div style="flex:1;">
-                        <p class="task-name">Submit dashboard proposal</p>
-                        <p class="task-meta">
-                            Tue Jul 1 · 
-                            <span class="domain-pill pill-rws" style="cursor:default;font-size:11px;padding:1px 7px;">RWS</span>
-                            <span class="pill-project" style="cursor:default;">Dashboard Build</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="task-row" data-domain="eplc" data-project="eplcsys">
-                    <div class="task-check"></div>
-                    <div style="flex:1;">
-                        <p class="task-name">Attend PD session</p>
-                        <p class="task-meta">
-                            Wed Jul 2 · 
-                            <span class="domain-pill pill-eplc" style="cursor:default;font-size:11px;padding:1px 7px;">EPLC</span>
-                            <span class="pill-project" style="cursor:default;">EPLC Classroom Systems</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="task-row" data-domain="rcbs" data-project="health">
-                    <div class="task-check"></div>
-                    <div style="flex:1;">
-                        <p class="task-name">Schedule annual physical</p>
-                        <p class="task-meta">
-                            Jul 4 wk · 
-                            <span class="domain-pill pill-rcbs" style="cursor:default;font-size:11px;padding:1px 7px;">RCBS</span>
-                            <span class="pill-project" style="cursor:default;">Personal Health Reset</span>
-                        </p>
-                    </div>
-                </div>
+            <div class="card" id="tasks-list">
+                <p class="loading">Loading tasks…</p>
             </div>
         </div>
     </div>
 
-    <!-- Notes Inbox -->
     <div id="sec-inbox">
         <p class="section-title">Note Inbox — Process &amp; Assign</p>
-        <div class="card" style="margin-bottom:1.5rem;">
-            <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:8px;">This Week</p>
-            <div class="note-row">
-                <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
-                <span class="note-title">Idea for apostolic base session 3 opening</span>
-                <span class="note-select">
-                    <select>
-                        <option>Assign domain…</option>
-                        <option>RCBS</option>
-                        <option>RWS</option>
-                        <option>SM</option>
-                        <option>MTS</option>
-                        <option>EPLC</option>
-                    </select>
-                </span>
-                <span class="note-age">2 days ago</span>
-            </div>
-            <div class="note-row">
-                <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
-                <span class="note-title">Dashboard pricing tier thoughts</span>
-                <span class="note-select">
-                    <select>
-                        <option>Assign domain…</option>
-                        <option>RCBS</option>
-                        <option>RWS</option>
-                        <option>SM</option>
-                        <option>MTS</option>
-                        <option>EPLC</option>
-                    </select>
-                </span>
-                <span class="note-age">4 days ago</span>
-            </div>
-            <p style="font-size:12px;font-weight:500;color:#888;margin:12px 0 8px;">Older</p>
-            <div class="note-row">
-                <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
-                <span class="note-title">Parent communication framework idea</span>
-                <span class="note-select">
-                    <select>
-                        <option>Assign domain…</option>
-                        <option>RCBS</option>
-                        <option>RWS</option>
-                        <option>SM</option>
-                        <option>MTS</option>
-                        <option>EPLC</option>
-                    </select>
-                </span>
-                <span class="note-age">12 days ago</span>
-            </div>
+        <div class="card" style="margin-bottom:1.5rem;" id="notes-list">
+            <p class="loading">Loading notes…</p>
         </div>
     </div>
 
-    <!-- Habits + What Didn't Get Done -->
     <div class="grid-2" style="margin-bottom:1.5rem;">
         <div id="sec-habits">
             <p class="section-title">
@@ -1043,144 +839,53 @@
                 <span id="habitWeekLabel"></span>
             </p>
             <div class="card">
+                <p style="font-size:12px;color:#888;margin-bottom:10px;">Tap dots to log this week from Habitify:</p>
                 <div class="habit-row">
                     <span class="habit-name">Morning stretch</span>
-                    <div class="habit-score">
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                    </div>
+                    <div class="habit-score" id="h0"></div>
                 </div>
                 <div class="habit-row">
                     <span class="habit-name">Daily bread</span>
-                    <div class="habit-score">
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                    </div>
+                    <div class="habit-score" id="h1"></div>
                 </div>
                 <div class="habit-row">
                     <span class="habit-name">Prayer / quiet time</span>
-                    <div class="habit-score">
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                    </div>
+                    <div class="habit-score" id="h2"></div>
                 </div>
                 <div class="habit-row">
                     <span class="habit-name">Highlight journaling</span>
-                    <div class="habit-score">
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-miss"></div>
-                    </div>
+                    <div class="habit-score" id="h3"></div>
                 </div>
                 <div class="habit-row">
                     <span class="habit-name">Make up bed</span>
-                    <div class="habit-score">
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-miss"></div>
-                    </div>
+                    <div class="habit-score" id="h4"></div>
                 </div>
                 <div class="habit-row">
                     <span class="habit-name">Daily declaration</span>
-                    <div class="habit-score">
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                    </div>
+                    <div class="habit-score" id="h5"></div>
                 </div>
                 <div class="habit-row">
                     <span class="habit-name">Step count</span>
-                    <div class="habit-score">
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-miss"></div>
-                    </div>
+                    <div class="habit-score" id="h6"></div>
                 </div>
                 <div class="habit-row">
                     <span class="habit-name">Exercise</span>
-                    <div class="habit-score">
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-miss"></div>
-                    </div>
+                    <div class="habit-score" id="h7"></div>
                 </div>
                 <div class="habit-row">
                     <span class="habit-name">Next day prep</span>
-                    <div class="habit-score">
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-done"></div>
-                        <div class="habit-dot dot-miss"></div>
-                    </div>
+                    <div class="habit-score" id="h8"></div>
                 </div>
             </div>
         </div>
         <div id="sec-undone">
             <p class="section-title">What Didn't Get Done</p>
-            <div class="card">
-                <div class="carried-row">
-                    <div class="overdue-check"></div>
-                    <div style="flex:1;">
-                        <p class="overdue-name">Update MTS tracker</p>
-                        <p class="overdue-sub">
-                            Carried from last week · 
-                            <span class="domain-pill pill-mts" style="cursor:default;font-size:11px;padding:1px 7px;">MTS</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="carried-row">
-                    <div class="overdue-check"></div>
-                    <div style="flex:1;">
-                        <p class="overdue-name">RCBS budget review</p>
-                        <p class="overdue-sub">
-                            Carried from last week · 
-                            <span class="domain-pill pill-rcbs" style="cursor:default;font-size:11px;padding:1px 7px;">RCBS</span>
-                        </p>
-                    </div>
-                </div>
+            <div class="card" id="overdue-list">
+                <p class="loading">Loading overdue tasks…</p>
             </div>
         </div>
     </div>
 
-    <!-- Weekly Reflection -->
     <div id="sec-reflection">
         <p class="section-title">Weekly Reflection</p>
         <div class="card" style="margin-bottom:1.5rem;">
@@ -1198,11 +903,10 @@
                     <textarea id="ref-carry" rows="5" placeholder="Intentions, posture, focus…"></textarea>
                 </div>
             </div>
-            <button class="btn btn-primary btn-full">Save Reflection to Notion →</button>
+            <button class="btn btn-primary btn-full" onclick="saveReflection()">Save Reflection to Notion →</button>
         </div>
     </div>
 
-    <!-- Plan Ahead -->
     <div id="sec-plan">
         <p class="section-title">Plan Ahead — Next Two Weeks</p>
         <div class="card" style="margin-bottom:1rem;">
@@ -1236,51 +940,202 @@
                 <textarea id="plan-eplc" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
             </div>
         </div>
-        <button class="btn btn-primary btn-full" style="margin-top:4px;">Save Plan to Notion →</button>
+        <button class="btn btn-primary btn-full" style="margin-top:4px;" onclick="savePlan()">Save Plan to Notion →</button>
     </div>
 
     <script>
+    // ─── CONFIG ───────────────────────────────────────────────
+    // Token lives in Cloudflare Worker — never put it here
+    const DB_PROJECTS = '33110b0375a88054b94bfda7c3e93ddb';
+    const DB_TASKS = '33110b0375a880c18918ebac71592a35';
+    const DB_NOTES = '6340f2b86ac94447a8315f0ba87545e3';
+    const PROXY = 'https://notion-proxy.renitacbsmith.workers.dev/v1';
+
+    const DOMAIN_STYLE = {
+        RCBS: {
+            pill: 'pill-rcbs',
+            color: '#7F77DD'
+        },
+        RWS: {
+            pill: 'pill-rws',
+            color: '#1D9E75'
+        },
+        SM: {
+            pill: 'pill-sm',
+            color: '#D85A30'
+        },
+        MTS: {
+            pill: 'pill-mts',
+            color: '#EF9F27'
+        },
+        EPLC: {
+            pill: 'pill-eplc',
+            color: '#378ADD'
+        },
+    };
+
+    // ─── DATES ────────────────────────────────────────────────
     function formatDate(d) {
         return d.toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric'
         });
     }
-
     function getReviewDates() {
         const today = new Date();
         const day = today.getDay();
-        const saturday = new Date(today);
-        saturday.setDate(today.getDate() + ((6 - day + 7) % 7));
-        const weekEnd = new Date(saturday);
-        const week1Start = new Date(saturday);
-        week1Start.setDate(saturday.getDate() + 1);
-        const week1End = new Date(week1Start);
-        week1End.setDate(week1Start.getDate() + 6);
-        const week2Start = new Date(week1End);
-        week2Start.setDate(week1End.getDate() + 1);
-        const week2End = new Date(week2Start);
-        week2End.setDate(week2Start.getDate() + 6);
+        const sat = new Date(today);
+        sat.setDate(today.getDate() + ((6 - day + 7) % 7));
+        const w1s = new Date(sat);
+        w1s.setDate(sat.getDate() + 1);
+        const w1e = new Date(w1s);
+        w1e.setDate(w1s.getDate() + 6);
+        const w2s = new Date(w1e);
+        w2s.setDate(w1e.getDate() + 1);
+        const w2e = new Date(w2s);
+        w2e.setDate(w2s.getDate() + 6);
         return {
-            weekEnd,
-            week1Start,
-            week1End,
-            week2Start,
-            week2End
+            weekEnd: sat,
+            w1s,
+            w1e,
+            w2s,
+            w2e
         };
     }
+    const DATES = getReviewDates();
+    document.getElementById('weekLabel').textContent = 'Week ending ' + formatDate(DATES.weekEnd) + ' · Looking ahead to ' + formatDate(DATES.w2e);
+    document.getElementById('habitWeekLabel').textContent = formatDate(DATES.weekEnd);
+    document.getElementById('week1Label').textContent = 'Week 1 · ' + formatDate(DATES.w1s) + ' – ' + formatDate(DATES.w1e);
+    document.getElementById('week2Label').textContent = 'Week 2 · ' + formatDate(DATES.w2s) + ' – ' + formatDate(DATES.w2e);
 
-    const dates = getReviewDates();
-    document.getElementById('weekLabel').textContent =
-    'Week ending ' + formatDate(dates.weekEnd) + ' · Looking ahead to ' + formatDate(dates.week2End);
-    document.getElementById('habitWeekLabel').textContent = formatDate(dates.weekEnd);
-    document.getElementById('week1Label').textContent =
-    'Week 1 · ' + formatDate(dates.week1Start) + ' – ' + formatDate(dates.week1End);
-    document.getElementById('week2Label').textContent =
-    'Week 2 · ' + formatDate(dates.week2Start) + ' – ' + formatDate(dates.week2End);
+    // ─── NOTION API ───────────────────────────────────────────
+    async function notionQuery(dbId, filter) {
+        const res = await fetch(`${PROXY}/databases/${dbId}/query`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            },
+            body: JSON.stringify(filter ? {
+                filter
+            } : {}),
+        });
+        if (!res.ok)
+            throw new Error('Notion API error ' + res.status);
+        return (await res.json()).results || [];
+    }
 
-    let activeDomain = null;
-    let activeProject = null;
+    async function notionCreate(dbId, properties) {
+        const res = await fetch(`${PROXY}/pages`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            },
+            body: JSON.stringify({
+                parent: {
+                    database_id: dbId
+                },
+                properties
+            }),
+        });
+        if (!res.ok)
+            throw new Error('Notion create error ' + res.status);
+        return res.json();
+    }
+
+    async function notionPatch(pageId, properties) {
+        const res = await fetch(`${PROXY}/pages/${pageId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            },
+            body: JSON.stringify({
+                properties
+            }),
+        });
+        if (!res.ok)
+            throw new Error('Notion patch error ' + res.status);
+        return res.json();
+    }
+
+    // ─── HELPERS ──────────────────────────────────────────────
+    function getTitle(page) {
+        for (const key of Object.keys(page.properties)) {
+            const p = page.properties[key];
+            if (p.type === 'title'&&p.title?.length)
+                return p.title.map(r => r.plain_text).join('');
+        }
+        return 'Untitled';
+    }
+
+    function getDomain(page) {
+        const props = page.properties;
+        for (const key of ['Pillar', 'Domain', 'Pillars']) {
+            if (!props[key])
+                continue;
+            if (props[key].type === 'select' && props[key].select)
+                return props[key].select.name;
+            if (props[key].type === 'rollup'&&props[key].rollup?.array?.length) {
+                for (const item of props[key].rollup.array) {
+                    if (item.type === 'title'&&item.title?.length)
+                        return item.title[0].plain_text;
+                }
+            }
+        }
+        return null;
+    }
+
+    function getProgress(page) {
+        const p=page.properties?.Progress;
+        if (!p)
+            return 0;
+        if (p.type === 'rollup' && p.rollup?.type === 'number')
+            return Math.round((p.rollup.number || 0) * 100);
+        if (p.type === 'number' && p.number !== null)
+            return Math.round((p.number || 0) * 100);
+        return 0;
+    }
+
+    function getDueDate(page) {
+        for (const key of ['Due Date', 'Due date', 'DueDate', 'Target Deadline']) {
+            const d=page.properties?.[key];
+            if (d?.type === 'date'&&d.date?.start)
+                return new Date(d.date.start);
+        }
+        return null;
+    }
+
+    function getCreatedDate(page) {
+        if (page.created_time)
+            return new Date(page.created_time);
+        return new Date();
+    }
+
+    function pillHtml(domain, small) {
+        const style = DOMAIN_STYLE[domain];
+        const cls = style ? style.pill : 'pill-unknown';
+        const sz = small ? 'font-size:11px;padding:1px 7px;' : '';
+        return `<span class="domain-pill ${cls}" style="cursor:default;${sz}">${domain || '?'}</span>`;
+    }
+
+    function daysAgo(date) {
+        const diff = Math.floor((Date.now() - date.getTime()) / 86400000);
+        if (diff === 0)
+            return 'Today';
+        if (diff === 1)
+            return '1 day ago';
+        return diff + ' days ago';
+    }
+
+    function domainColor(d) {
+        return DOMAIN_STYLE[d]?.color || '#ccc';
+    }
+
+    // ─── FILTER STATE ─────────────────────────────────────────
+    let activeDomain = null,
+        activeProject = null;
 
     function applyFilters() {
         document.querySelectorAll('.project-row[data-domain]').forEach(row => {
@@ -1288,7 +1143,7 @@
             (!activeProject || row.dataset.project === activeProject);
             row.classList.toggle('hidden', !show);
             const next = row.nextElementSibling;
-            if (next && next.classList.contains('progress-wrap'))
+            if(next?.classList.contains('progress-wrap'))
                 next.classList.toggle('hidden', !show);
         });
         document.querySelectorAll('.task-row[data-domain]').forEach(row => {
@@ -1303,27 +1158,24 @@
         document.querySelectorAll('#filterBar .domain-pill').forEach(p => {
             p.classList.remove('pill-active-rcbs', 'pill-active-rws', 'pill-active-sm', 'pill-active-mts', 'pill-active-eplc');
             if (p.dataset.domain === activeDomain)
-                p.classList.add('pill-active-' + activeDomain);
+                p.classList.add('pill-active-' + activeDomain.toLowerCase());
         });
         applyFilters();
     }
 
-    function toggleProject(project) {
-        activeProject = activeProject === project ? null : project;
-        document.querySelectorAll('#projectBar .pill-project').forEach(p => {
-            p.classList.toggle('active', p.dataset.project === activeProject);
-        });
+    function toggleProject(id) {
+        activeProject = activeProject === id ? null : id;
+        document.querySelectorAll('#projectBar .pill-project').forEach(p => p.classList.toggle('active', p.dataset.project === activeProject));
         applyFilters();
     }
 
     function clearFilters() {
         activeDomain = null;
         activeProject = null;
-        document.querySelectorAll('#filterBar .domain-pill').forEach(p => {
-            p.classList.remove('pill-active-rcbs', 'pill-active-rws', 'pill-active-sm', 'pill-active-mts', 'pill-active-eplc');
-        });
+        document.querySelectorAll('#filterBar .domain-pill').forEach(p =>
+        p.classList.remove('pill-active-rcbs', 'pill-active-rws', 'pill-active-sm', 'pill-active-mts', 'pill-active-eplc'));
         document.querySelectorAll('#projectBar .pill-project').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.project-row[data-domain], .task-row[data-domain], .progress-wrap').forEach(r => r.classList.remove('hidden'));
+        document.querySelectorAll('.project-row[data-domain],.task-row[data-domain],.progress-wrap').forEach(r => r.classList.remove('hidden'));
     }
 
     function toggleStar(el) {
@@ -1338,8 +1190,269 @@
         el.classList.add('active');
     }
 
+    // ─── RENDER PROJECTS ──────────────────────────────────────
+    function renderProjects(pages) {
+        const list = document.getElementById('projects-list');
+        const bar = document.getElementById('projectBar');
+
+        if (!pages.length) {
+            list.innerHTML = '<p class="empty">No active projects found</p>';
+            bar.innerHTML = '';
+            return;
+        }
+
+        const domainCount = {};
+        pages.forEach(p => {
+            const d = getDomain(p);
+            if (d)
+                domainCount[d] = (domainCount[d] || 0) + 1;
+        });
+        const total = pages.length;
+
+        document.getElementById('dist-bar').innerHTML = Object.entries(domainCount).map(([d, c]) =>
+        `<div class="dist-seg" style="width:${Math.round(c / total * 100)}%;background:${domainColor(d)};"></div>`).join('');
+        document.getElementById('dist-legend').innerHTML = Object.entries(domainCount).map(([d, c]) =>
+        `<div class="dist-item"><div class="dist-dot" style="background:${domainColor(d)};"></div>${d} ${Math.round(c / total * 100)}%</div>`).join('');
+
+        bar.innerHTML = pages.map(p =>
+        `<span class="pill-project" data-project="${p.id}" onclick="toggleProject('${p.id}')">${getTitle(p)}</span>`
+        ).join('') + `<span class="clear-filter" onclick="clearFilters()">Clear</span>`;
+
+        list.innerHTML = pages.map(p => {
+            const domain = getDomain(p) || '?';
+            const prog = getProgress(p);
+            return `
+      <div class="project-row" data-domain="${domain}" data-project="${p.id}">
+        <span class="star star-off" onclick="toggleStar(this)">☆</span>
+        <span class="project-name">${
+            getTitle(p)}</span>
+        ${pillHtml(domain, true)}
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" style="width:${
+
+            prog}%;background:${domainColor(domain)};"></div></div>
+      </div>`
+            ;
+        }).join('');
+
+        document.getElementById('metric-projects').textContent = pages.length;
+    }
+
+    // ─── RENDER TASKS ─────────────────────────────────────────
+    function renderTasks(pages, projectMap) {
+        const list = document.getElementById('tasks-list');
+        const overdEl = document.getElementById('overdue-list');
+        const now = new Date();
+        const twoWks = new Date();
+        twoWks.setDate(now.getDate() + 14);
+
+        const upcoming = pages.filter(p => {
+            const d = getDueDate(p);
+            return d && d >= now && d <= twoWks;
+        });
+        const overdue = pages.filter(p => {
+            const d = getDueDate(p);
+            return d && d < now;
+        });
+
+        document.getElementById('metric-tasks').textContent = upcoming.length;
+        document.getElementById('metric-overdue').textContent = overdue.length;
+
+        list.innerHTML = !upcoming.length ? '<p class="empty">No tasks due in the next two weeks</p>' :
+        upcoming.map(p => {
+            const domain = getDomain(p) || '?';
+            const due = getDueDate(p);
+            const dateStr = due ? due.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
+            }) : '';
+            const projId = p.properties?.Project?.relation?.[0]?.id || null;
+            const projName = projId && projectMap[projId] ? projectMap[projId] : '';
+            const projPill = projName ? `<span class="pill-project" style="cursor:default;">${projName}</span>` : '';
+            return `
+        <div class="task-row" data-domain="${domain}" data-project="${projId || ''}">
+          <div class="task-check"></div>
+          <div style="flex:1;">
+            <p class="task-name">${
+
+            getTitle(p)}</p>
+            <p class="task-meta">${dateStr} · ${pillHtml(domain, true)}${projPill}</p>
+          </div>
+        </div>`
+
+            ;
+        }).join('');
+
+        overdEl.innerHTML = !overdue.length ? '<p class="empty">Nothing carried over — nice work.</p>' :
+        overdue.map(p => {
+            const domain = getDomain(p) || '?';
+            return `
+        <div class="carried-row">
+          <div class="overdue-check"></div>
+          <div style="flex:1;">
+            <p class="overdue-name">${
+
+
+            getTitle(p)}</p>
+            <p class="overdue-sub">Overdue · ${pillHtml(domain, true)}</p>
+          </div>
+        </div>`
+
+            ;
+        }).join('');
+    }
+
+    // ─── RENDER NOTES ─────────────────────────────────────────
+    function renderNotes(pages) {
+        const list = document.getElementById('notes-list');
+        document.getElementById('metric-notes').textContent = pages.length;
+
+        if (!pages.length) {
+            list.innerHTML = '<p class="empty">Inbox zero — all notes are processed.</p>';
+            return;
+        }
+
+        const now = Date.now();
+        const oneWeek = 7 * 86400000;
+        const thisWk = pages.filter(p => now - getCreatedDate(p).getTime() <= oneWeek);
+        const older = pages.filter(p => now - getCreatedDate(p).getTime() > oneWeek);
+
+        function noteRow(p) {
+            return `
+      <div class="note-row" data-page-id="${p.id}">
+        <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
+        <span class="note-title">${
+            getTitle(p)}</span>
+        <span class="note-select">
+          <select onchange="assignDomain('${
+            p.id}',this.value)">
+            <option value="">Assign domain…</option>
+            <option>RCBS</option><option>RWS</option><option>SM</option><option>MTS</option><option>EPLC</option>
+          </select>
+        </span>
+        <span class="note-age">${
+
+
+
+            daysAgo(getCreatedDate(p))}</span>
+      </div>`
+            ;
+        }
+
+        list.innerHTML =
+        (thisWk.length ? `<p style="font-size:12px;font-weight:500;color:#888;margin-bottom:8px;">This Week</p>${thisWk.map(noteRow).join('')}` : '') +
+        (older.length ? `<p style="font-size:12px;font-weight:500;color:#888;margin:12px 0 8px;">Older</p>${older.map(noteRow).join('')}` : '');
+    }
+
+    // ─── HABITS ───────────────────────────────────────────────
+    function buildHabitDots() {
+        for (let i = 0; i < 9; i++) {
+            const el = document.getElementById('h' + i);
+            if (!el)
+                continue;
+            el.innerHTML = Array.from({
+                length: 7
+            }, (_, d) =>
+            `<div class="habit-dot dot-miss" onclick="toggleHabit(this)" style="cursor:pointer;" title="Day ${d + 1}"></div>`
+            ).join('');
+        }
+    }
+    function toggleHabit(el) {
+        el.classList.toggle('dot-done');
+        el.classList.toggle('dot-miss');
+    }
+
+    // ─── ASSIGN DOMAIN ────────────────────────────────────────
+    async function assignDomain(pageId, domain) {
+        if (!domain)
+            return;
+        try {
+            await notionPatch(pageId, {
+                Pillar: {
+                    select: {
+                        name: domain
+                    }
+                }
+            });
+            const row = document.querySelector(`[data-page-id="${pageId}"]`);
+            if (row) {
+                row.style.opacity = '0.4';
+                setTimeout(() => row.remove(), 400);
+            }
+            const cur = parseInt(document.getElementById('metric-notes').textContent) || 0;
+            document.getElementById('metric-notes').textContent = Math.max(0, cur - 1);
+        } catch (e) {
+            alert('Could not save to Notion. Please try again.');
+        }
+    }
+
+    // ─── SAVE REFLECTION ──────────────────────────────────────
+    async function saveReflection() {
+        const needle = document.getElementById('ref-needle').value.trim();
+        const didnt = document.getElementById('ref-didnt').value.trim();
+        const carry = document.getElementById('ref-carry').value.trim();
+        if (!needle && !didnt && !carry) {
+            alert('Add at least one reflection before saving.');
+            return;
+        }
+        try {
+            await notionCreate(DB_NOTES, {
+                Name: {
+                    title: [{
+                        text: {
+                            content: 'Weekly Reflection — ' + formatDate(DATES.weekEnd)
+                        }
+                    }]
+                },
+                Pillar: {
+                    select: {
+                        name: 'RCBS'
+                    }
+                },
+            });
+            alert('Reflection saved to Notion!');
+        } catch (e) {
+            alert('Could not save. Please try again.');
+        }
+    }
+
+    // ─── SAVE PLAN ────────────────────────────────────────────
+    async function savePlan() {
+        const theme = document.getElementById('plan-theme').value.trim();
+        const goals = ['rcbs', 'rws', 'sm', 'mts', 'eplc'].map(d => {
+            const v = document.getElementById('plan-' + d).value.trim();
+            return v ? `${d.toUpperCase()}: ${v}` : null;
+        }).filter(Boolean).join('\n');
+        if (!theme && !goals) {
+            alert('Add at least one goal before saving.');
+            return;
+        }
+        try {
+            await notionCreate(DB_NOTES, {
+                Name: {
+                    title: [{
+                        text: {
+                            content: 'Plan Ahead — ' + formatDate(DATES.w1s) + ' to ' + formatDate(DATES.w2e)
+                        }
+                    }]
+                },
+                Pillar: {
+                    select: {
+                        name: 'RCBS'
+                    }
+                },
+            });
+            alert('Plan saved to Notion!');
+        } catch (e) {
+            alert('Could not save. Please try again.');
+        }
+    }
+
+    // ─── RESET ────────────────────────────────────────────────
     function hardReset() {
-        if (!confirm('Reset the dashboard? This will clear all stars, filters, and reflection fields.'))
+        if (!confirm('Reset the dashboard? This will clear all stars, filters, and text fields.'))
             return;
         clearFilters();
         document.querySelectorAll('.star').forEach(s => {
@@ -1350,11 +1463,55 @@
         document.querySelectorAll('textarea').forEach(t => t.value = '');
         document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
         document.querySelectorAll('.time-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
+        buildHabitDots();
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
         });
     }
+
+    // ─── INIT ─────────────────────────────────────────────────
+    async function init() {
+        buildHabitDots();
+        try {
+            const [projects, tasks, notes] = await Promise.all([
+            notionQuery(DB_PROJECTS, {
+                property: 'Status',
+                status: {
+                    does_not_equal: 'Done'
+                }
+            }),
+            notionQuery(DB_TASKS, {
+                property: 'Status',
+                status: {
+                    does_not_equal: 'Done'
+                }
+            }),
+            notionQuery(DB_NOTES, {
+                property: 'Pillar',
+                relation: {
+                    is_empty: true
+                }
+            }),
+            ]);
+            const projectMap = {};
+            projects.forEach(p => {
+                projectMap[p.id] = getTitle(p);
+            });
+            renderProjects(projects);
+            renderTasks(tasks, projectMap);
+            renderNotes(notes);
+        } catch (e) {
+            console.error(e);
+            ['projects-list', 'tasks-list', 'notes-list', 'overdue-list'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el)
+                    el.innerHTML = `<p class="error-msg">⚠️ Could not connect to Notion: ${e.message}</p>`;
+            });
+        }
+    }
+
+    init();
     </script>
 </body>
 </html>

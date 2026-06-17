@@ -22,15 +22,15 @@
     }
 
     h1 {
-        font-size: 22px;
-        font-weight: 500;
+        font-size: 30px;
+        font-weight: 600;
         margin-bottom: 4px;
     }
 
     .subtitle {
         font-size: 13px;
         color: #666;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
 
     .section-title {
@@ -53,13 +53,6 @@
     .grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-bottom: 1.5rem;
-    }
-
-    .grid-3 {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
         gap: 12px;
         margin-bottom: 1.5rem;
     }
@@ -130,6 +123,24 @@
         color: #0C447C;
     }
 
+    .pill-project {
+        background: #f0efe9;
+        color: #444;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 20px;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        user-select: none;
+        transition: all 0.15s;
+    }
+
+    .pill-project.active {
+        border-color: #1a1a1a;
+    }
+
     .pill-active-rcbs {
         border-color: #7F77DD;
     }
@@ -150,12 +161,33 @@
         border-color: #378ADD;
     }
 
-    .domain-filter-bar {
+    .filter-bar {
         display: flex;
         gap: 8px;
         margin-bottom: 12px;
         flex-wrap: wrap;
         align-items: center;
+    }
+
+    .time-pill {
+        display: inline-flex;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 3px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        border: 1.5px solid #ccc;
+        background: #fff;
+        color: #555;
+        transition: all 0.15s;
+        user-select: none;
+    }
+
+    .time-pill.active {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #1a1a1a;
     }
 
     .clear-filter {
@@ -237,16 +269,17 @@
 
     .task-name {
         font-size: 14px;
-        margin: 0 0 2px;
+        margin: 0 0 4px;
     }
 
-    .task-due {
+    .task-meta {
         font-size: 12px;
         color: #888;
         margin: 0;
         display: flex;
         align-items: center;
         gap: 6px;
+        flex-wrap: wrap;
     }
 
     .note-row {
@@ -351,19 +384,6 @@
     .dot-miss {
         background: #f0efe9;
         border: 0.5px solid #ccc;
-    }
-
-    .day-headers {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 4px;
-        margin-bottom: 4px;
-    }
-
-    .day-header-label {
-        font-size: 10px;
-        color: #888;
-        text-align: center;
     }
 
     .cal-week {
@@ -489,6 +509,18 @@
         background: #333;
     }
 
+    .btn-reset {
+        background: #fff;
+        color: #a32d2d;
+        border-color: #a32d2d;
+        font-size: 12px;
+        padding: 6px 14px;
+    }
+
+    .btn-reset:hover {
+        background: #fceded;
+    }
+
     .carried-row {
         display: flex;
         align-items: flex-start;
@@ -529,26 +561,127 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.75rem;
     }
 
-    hr {
-        border: none;
-        border-top: 0.5px solid rgba(0, 0, 0, 0.08);
-        margin: 1.5rem 0;
+    .jump-bar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .jump-btn {
+        font-size: 12px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        border: 0.5px solid #ccc;
+        background: #fff;
+        cursor: pointer;
+        color: #555;
+        transition: background 0.15s;
+    }
+
+    .jump-btn:hover {
+        background: #f0efe9;
+    }/* Plan Ahead domain cards */
+
+    .plan-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .plan-card {
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        border: 0.5px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .plan-card-rcbs {
+        background: #EEEDFE;
+    }
+
+    .plan-card-rws {
+        background: #E1F5EE;
+    }
+
+    .plan-card-sm {
+        background: #FAECE7;
+    }
+
+    .plan-card-mts {
+        background: #FAEEDA;
+    }
+
+    .plan-card-eplc {
+        background: #E6F1FB;
+    }
+
+    .plan-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
+    }
+
+    .plan-label-rcbs {
+        color: #3C3489;
+    }
+
+    .plan-label-rws {
+        color: #085041;
+    }
+
+    .plan-label-sm {
+        color: #712B13;
+    }
+
+    .plan-label-mts {
+        color: #633806;
+    }
+
+    .plan-label-eplc {
+        color: #0C447C;
+    }
+
+    .plan-card textarea {
+        background: rgba(255, 255, 255, 0.6);
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .plan-card textarea:focus {
+        border-color: rgba(0, 0, 0, 0.25);
+    }
+
+    .plan-full {
+        grid-column: 1/-1;
     }
     </style>
 </head>
 <body>
 
+    <!-- Header -->
     <div class="header-row">
         <div>
-            <h1>Saturday review</h1>
+            <h1>Weekly Review</h1>
             <p class="subtitle" id="weekLabel">Loading dates…</p>
         </div>
-        <button class="btn">Plan ahead →</button>
+        <button class="btn btn-reset" onclick="hardReset()">↺ Reset</button>
     </div>
 
+    <!-- Jump Nav -->
+    <div class="jump-bar">
+        <button class="jump-btn" onclick="document.getElementById('sec-inbox').scrollIntoView({behavior:'smooth'})">📥 Notes Inbox</button>
+        <button class="jump-btn" onclick="document.getElementById('sec-undone').scrollIntoView({behavior:'smooth'})">⚠️ What Didn't Get Done</button>
+        <button class="jump-btn" onclick="document.getElementById('sec-habits').scrollIntoView({behavior:'smooth'})">🔵 Habit Pulse</button>
+        <button class="jump-btn" onclick="document.getElementById('sec-reflection').scrollIntoView({behavior:'smooth'})">✍️ Weekly Reflection</button>
+        <button class="jump-btn" onclick="document.getElementById('sec-plan').scrollIntoView({behavior:'smooth'})">🎯 Plan Ahead</button>
+    </div>
+
+    <!-- Metrics -->
     <div class="grid-5">
         <div class="metric">
             <p class="metric-label">Active projects</p>
@@ -572,10 +705,15 @@
         </div>
     </div>
 
-    <p class="section-title">
-        Domain attention — week ending 
-        <span id="weekEndLabel"></span>
-    </p>
+    <!-- Domains -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <p class="section-title" style="margin:0;">Domains</p>
+        <div class="filter-bar" style="margin:0;">
+            <span class="time-pill active" data-time="week" onclick="toggleTime(this)">This Week</span>
+            <span class="time-pill" data-time="next" onclick="toggleTime(this)">Next Week</span>
+            <span class="time-pill" data-time="two" onclick="toggleTime(this)">Next Two Weeks</span>
+        </div>
+    </div>
     <div class="card" style="margin-bottom:1.5rem;">
         <div class="dist-bar-wrap">
             <div class="dist-seg" style="width:18%;background:#7F77DD;"></div>
@@ -608,10 +746,11 @@
         </div>
     </div>
 
-    <p class="section-title">Two-week outlook — calendar</p>
+    <!-- Calendar -->
+    <p class="section-title">Two-Week Outlook — Calendar</p>
     <div class="card" style="margin-bottom:1.5rem;">
         <p class="week-divider" id="week1Label">Week 1</p>
-        <div class="cal-week" id="week1">
+        <div class="cal-week">
             <div class="cal-day">
                 <p class="cal-day-label">Sun</p>
             </div>
@@ -640,7 +779,7 @@
             </div>
         </div>
         <p class="week-divider" id="week2Label">Week 2</p>
-        <div class="cal-week" id="week2">
+        <div class="cal-week">
             <div class="cal-day">
                 <p class="cal-day-label">Sun</p>
                 <div class="cal-event ev-sm">Sunday service</div>
@@ -669,21 +808,33 @@
         </div>
     </div>
 
-    <p class="section-title">Filter by domain</p>
-    <div class="domain-filter-bar" id="filterBar">
-        <span class="domain-pill pill-rcbs" data-domain="rcbs" onclick="toggleFilter('rcbs')">RCBS</span>
-        <span class="domain-pill pill-rws" data-domain="rws" onclick="toggleFilter('rws')">RWS</span>
-        <span class="domain-pill pill-sm" data-domain="sm" onclick="toggleFilter('sm')">SM</span>
-        <span class="domain-pill pill-mts" data-domain="mts" onclick="toggleFilter('mts')">MTS</span>
-        <span class="domain-pill pill-eplc" data-domain="eplc" onclick="toggleFilter('eplc')">EPLC</span>
-        <span class="clear-filter" onclick="clearFilter()">Clear</span>
+    <!-- Filters -->
+    <p class="section-title">Filter By Domain</p>
+    <div class="filter-bar" id="filterBar" style="margin-bottom:6px;">
+        <span class="domain-pill pill-rcbs" data-domain="rcbs" onclick="toggleDomain('rcbs')">RCBS</span>
+        <span class="domain-pill pill-rws" data-domain="rws" onclick="toggleDomain('rws')">RWS</span>
+        <span class="domain-pill pill-sm" data-domain="sm" onclick="toggleDomain('sm')">SM</span>
+        <span class="domain-pill pill-mts" data-domain="mts" onclick="toggleDomain('mts')">MTS</span>
+        <span class="domain-pill pill-eplc" data-domain="eplc" onclick="toggleDomain('eplc')">EPLC</span>
+        <span class="clear-filter" onclick="clearFilters()">Clear</span>
+    </div>
+    <p class="section-title" style="margin-top:8px;">Filter By Project</p>
+    <div class="filter-bar" id="projectBar" style="margin-bottom:1.5rem;">
+        <span class="pill-project" data-project="dashboard" onclick="toggleProject('dashboard')">Dashboard Build</span>
+        <span class="pill-project" data-project="dwell" onclick="toggleProject('dwell')">dWell Follow Up</span>
+        <span class="pill-project" data-project="sentmiami" onclick="toggleProject('sentmiami')">Sent Miami Curriculum</span>
+        <span class="pill-project" data-project="eplcsys" onclick="toggleProject('eplcsys')">EPLC Classroom Systems</span>
+        <span class="pill-project" data-project="health" onclick="toggleProject('health')">Personal Health Reset</span>
+        <span class="pill-project" data-project="mtsq3" onclick="toggleProject('mtsq3')">MTS Q3 Deliverables</span>
+        <span class="clear-filter" onclick="clearFilters()">Clear</span>
     </div>
 
+    <!-- Projects + Tasks -->
     <div class="grid-2">
         <div>
-            <p class="section-title">Active projects — set priorities</p>
+            <p class="section-title">Active Projects — Set Priorities</p>
             <div class="card">
-                <div class="project-row" data-domain="rws">
+                <div class="project-row" data-domain="rws" data-project="dashboard">
                     <span class="star star-on" onclick="toggleStar(this)">★</span>
                     <span class="project-name">Dashboard side hustle build</span>
                     <span class="domain-pill pill-rws" style="cursor:default;font-size:11px;padding:2px 8px;">RWS</span>
@@ -693,7 +844,7 @@
                         <div class="progress-fill" style="width:60%;background:#1D9E75;"></div>
                     </div>
                 </div>
-                <div class="project-row" data-domain="sm">
+                <div class="project-row" data-domain="sm" data-project="dwell">
                     <span class="star star-on" onclick="toggleStar(this)">★</span>
                     <span class="project-name">dWell post-conference follow up</span>
                     <span class="domain-pill pill-sm" style="cursor:default;font-size:11px;padding:2px 8px;">SM</span>
@@ -703,7 +854,7 @@
                         <div class="progress-fill" style="width:80%;background:#D85A30;"></div>
                     </div>
                 </div>
-                <div class="project-row" data-domain="sm">
+                <div class="project-row" data-domain="sm" data-project="sentmiami">
                     <span class="star star-off" onclick="toggleStar(this)">☆</span>
                     <span class="project-name">Sent Miami curriculum — Range</span>
                     <span class="domain-pill pill-sm" style="cursor:default;font-size:11px;padding:2px 8px;">SM</span>
@@ -713,7 +864,7 @@
                         <div class="progress-fill" style="width:40%;background:#D85A30;"></div>
                     </div>
                 </div>
-                <div class="project-row" data-domain="eplc">
+                <div class="project-row" data-domain="eplc" data-project="eplcsys">
                     <span class="star star-off" onclick="toggleStar(this)">☆</span>
                     <span class="project-name">EPLC classroom systems</span>
                     <span class="domain-pill pill-eplc" style="cursor:default;font-size:11px;padding:2px 8px;">EPLC</span>
@@ -723,7 +874,7 @@
                         <div class="progress-fill" style="width:20%;background:#378ADD;"></div>
                     </div>
                 </div>
-                <div class="project-row" data-domain="rcbs">
+                <div class="project-row" data-domain="rcbs" data-project="health">
                     <span class="star star-off" onclick="toggleStar(this)">☆</span>
                     <span class="project-name">Personal health reset</span>
                     <span class="domain-pill pill-rcbs" style="cursor:default;font-size:11px;padding:2px 8px;">RCBS</span>
@@ -733,7 +884,7 @@
                         <div class="progress-fill" style="width:30%;background:#7F77DD;"></div>
                     </div>
                 </div>
-                <div class="project-row" data-domain="mts">
+                <div class="project-row" data-domain="mts" data-project="mtsq3">
                     <span class="star star-off" onclick="toggleStar(this)">☆</span>
                     <span class="project-name">MTS Q3 deliverables</span>
                     <span class="domain-pill pill-mts" style="cursor:default;font-size:11px;padding:2px 8px;">MTS</span>
@@ -747,75 +898,82 @@
         </div>
 
         <div>
-            <p class="section-title">Tasks — next two weeks</p>
+            <p class="section-title">Tasks — Next Two Weeks</p>
             <div class="card">
-                <div class="task-row" data-domain="sm">
+                <div class="task-row" data-domain="sm" data-project="dwell">
                     <div class="task-check"></div>
                     <div style="flex:1;">
                         <p class="task-name">Send speaker thank-you notes</p>
-                        <p class="task-due">
+                        <p class="task-meta">
                             Mon Jun 23 · 
                             <span class="domain-pill pill-sm" style="cursor:default;font-size:11px;padding:1px 7px;">SM</span>
+                            <span class="pill-project" style="cursor:default;">dWell Follow Up</span>
                         </p>
                     </div>
                 </div>
-                <div class="task-row" data-domain="rws">
+                <div class="task-row" data-domain="rws" data-project="dashboard">
                     <div class="task-check"></div>
                     <div style="flex:1;">
                         <p class="task-name">Finalize first client proposal</p>
-                        <p class="task-due">
+                        <p class="task-meta">
                             Wed Jun 25 · 
                             <span class="domain-pill pill-rws" style="cursor:default;font-size:11px;padding:1px 7px;">RWS</span>
+                            <span class="pill-project" style="cursor:default;">Dashboard Build</span>
                         </p>
                     </div>
                 </div>
-                <div class="task-row" data-domain="mts">
+                <div class="task-row" data-domain="mts" data-project="mtsq3">
                     <div class="task-check"></div>
                     <div style="flex:1;">
                         <p class="task-name">Review MTS deliverables</p>
-                        <p class="task-due">
+                        <p class="task-meta">
                             Thu Jun 26 · 
                             <span class="domain-pill pill-mts" style="cursor:default;font-size:11px;padding:1px 7px;">MTS</span>
+                            <span class="pill-project" style="cursor:default;">MTS Q3 Deliverables</span>
                         </p>
                     </div>
                 </div>
-                <div class="task-row" data-domain="eplc">
+                <div class="task-row" data-domain="eplc" data-project="eplcsys">
                     <div class="task-check"></div>
                     <div style="flex:1;">
                         <p class="task-name">Set up classroom systems doc</p>
-                        <p class="task-due">
+                        <p class="task-meta">
                             Fri Jun 27 · 
                             <span class="domain-pill pill-eplc" style="cursor:default;font-size:11px;padding:1px 7px;">EPLC</span>
+                            <span class="pill-project" style="cursor:default;">EPLC Classroom Systems</span>
                         </p>
                     </div>
                 </div>
-                <div class="task-row" data-domain="rws">
+                <div class="task-row" data-domain="rws" data-project="dashboard">
                     <div class="task-check"></div>
                     <div style="flex:1;">
                         <p class="task-name">Submit dashboard proposal</p>
-                        <p class="task-due">
+                        <p class="task-meta">
                             Tue Jul 1 · 
                             <span class="domain-pill pill-rws" style="cursor:default;font-size:11px;padding:1px 7px;">RWS</span>
+                            <span class="pill-project" style="cursor:default;">Dashboard Build</span>
                         </p>
                     </div>
                 </div>
-                <div class="task-row" data-domain="eplc">
+                <div class="task-row" data-domain="eplc" data-project="eplcsys">
                     <div class="task-check"></div>
                     <div style="flex:1;">
                         <p class="task-name">Attend PD session</p>
-                        <p class="task-due">
+                        <p class="task-meta">
                             Wed Jul 2 · 
                             <span class="domain-pill pill-eplc" style="cursor:default;font-size:11px;padding:1px 7px;">EPLC</span>
+                            <span class="pill-project" style="cursor:default;">EPLC Classroom Systems</span>
                         </p>
                     </div>
                 </div>
-                <div class="task-row" data-domain="rcbs">
+                <div class="task-row" data-domain="rcbs" data-project="health">
                     <div class="task-check"></div>
                     <div style="flex:1;">
                         <p class="task-name">Schedule annual physical</p>
-                        <p class="task-due">
+                        <p class="task-meta">
                             Jul 4 wk · 
                             <span class="domain-pill pill-rcbs" style="cursor:default;font-size:11px;padding:1px 7px;">RCBS</span>
+                            <span class="pill-project" style="cursor:default;">Personal Health Reset</span>
                         </p>
                     </div>
                 </div>
@@ -823,61 +981,65 @@
         </div>
     </div>
 
-    <p class="section-title">Note inbox — process &amp; assign</p>
-    <div class="card" style="margin-bottom:1.5rem;">
-        <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:8px;">This week</p>
-        <div class="note-row">
-            <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
-            <span class="note-title">Idea for apostolic base session 3 opening</span>
-            <span class="note-select">
-                <select>
-                    <option>Assign domain…</option>
-                    <option>RCBS</option>
-                    <option>RWS</option>
-                    <option>SM</option>
-                    <option>MTS</option>
-                    <option>EPLC</option>
-                </select>
-            </span>
-            <span class="note-age">2 days ago</span>
-        </div>
-        <div class="note-row">
-            <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
-            <span class="note-title">Dashboard pricing tier thoughts</span>
-            <span class="note-select">
-                <select>
-                    <option>Assign domain…</option>
-                    <option>RCBS</option>
-                    <option>RWS</option>
-                    <option>SM</option>
-                    <option>MTS</option>
-                    <option>EPLC</option>
-                </select>
-            </span>
-            <span class="note-age">4 days ago</span>
-        </div>
-        <p style="font-size:12px;font-weight:500;color:#888;margin:12px 0 8px;">Older</p>
-        <div class="note-row">
-            <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
-            <span class="note-title">Parent communication framework idea</span>
-            <span class="note-select">
-                <select>
-                    <option>Assign domain…</option>
-                    <option>RCBS</option>
-                    <option>RWS</option>
-                    <option>SM</option>
-                    <option>MTS</option>
-                    <option>EPLC</option>
-                </select>
-            </span>
-            <span class="note-age">12 days ago</span>
+    <!-- Notes Inbox -->
+    <div id="sec-inbox">
+        <p class="section-title">Note Inbox — Process &amp; Assign</p>
+        <div class="card" style="margin-bottom:1.5rem;">
+            <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:8px;">This Week</p>
+            <div class="note-row">
+                <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
+                <span class="note-title">Idea for apostolic base session 3 opening</span>
+                <span class="note-select">
+                    <select>
+                        <option>Assign domain…</option>
+                        <option>RCBS</option>
+                        <option>RWS</option>
+                        <option>SM</option>
+                        <option>MTS</option>
+                        <option>EPLC</option>
+                    </select>
+                </span>
+                <span class="note-age">2 days ago</span>
+            </div>
+            <div class="note-row">
+                <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
+                <span class="note-title">Dashboard pricing tier thoughts</span>
+                <span class="note-select">
+                    <select>
+                        <option>Assign domain…</option>
+                        <option>RCBS</option>
+                        <option>RWS</option>
+                        <option>SM</option>
+                        <option>MTS</option>
+                        <option>EPLC</option>
+                    </select>
+                </span>
+                <span class="note-age">4 days ago</span>
+            </div>
+            <p style="font-size:12px;font-weight:500;color:#888;margin:12px 0 8px;">Older</p>
+            <div class="note-row">
+                <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
+                <span class="note-title">Parent communication framework idea</span>
+                <span class="note-select">
+                    <select>
+                        <option>Assign domain…</option>
+                        <option>RCBS</option>
+                        <option>RWS</option>
+                        <option>SM</option>
+                        <option>MTS</option>
+                        <option>EPLC</option>
+                    </select>
+                </span>
+                <span class="note-age">12 days ago</span>
+            </div>
         </div>
     </div>
 
+    <!-- Habits + What Didn't Get Done -->
     <div class="grid-2" style="margin-bottom:1.5rem;">
-        <div>
+        <div id="sec-habits">
             <p class="section-title">
-                Habit pulse — week ending 
+                Habit Pulse — Week Ending 
                 <span id="habitWeekLabel"></span>
             </p>
             <div class="card">
@@ -991,8 +1153,8 @@
                 </div>
             </div>
         </div>
-        <div>
-            <p class="section-title">What didn't get done</p>
+        <div id="sec-undone">
+            <p class="section-title">What Didn't Get Done</p>
             <div class="card">
                 <div class="carried-row">
                     <div class="overdue-check"></div>
@@ -1018,23 +1180,63 @@
         </div>
     </div>
 
-    <p class="section-title">Weekly reflection</p>
-    <div class="card" style="margin-bottom:1.5rem;">
-        <div class="reflect-grid">
-            <div>
-                <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What moved the needle?</p>
-                <textarea rows="5" placeholder="Your biggest win this week…"></textarea>
+    <!-- Weekly Reflection -->
+    <div id="sec-reflection">
+        <p class="section-title">Weekly Reflection</p>
+        <div class="card" style="margin-bottom:1.5rem;">
+            <div class="reflect-grid">
+                <div>
+                    <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What moved the needle?</p>
+                    <textarea id="ref-needle" rows="5" placeholder="Your biggest win this week…"></textarea>
+                </div>
+                <div>
+                    <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What didn't work?</p>
+                    <textarea id="ref-didnt" rows="5" placeholder="What you'd do differently…"></textarea>
+                </div>
+                <div>
+                    <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What are you carrying into next week?</p>
+                    <textarea id="ref-carry" rows="5" placeholder="Intentions, posture, focus…"></textarea>
+                </div>
             </div>
-            <div>
-                <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What didn't work?</p>
-                <textarea rows="5" placeholder="What you'd do differently…"></textarea>
+            <button class="btn btn-primary btn-full">Save Reflection to Notion →</button>
+        </div>
+    </div>
+
+    <!-- Plan Ahead -->
+    <div id="sec-plan">
+        <p class="section-title">Plan Ahead — Next Two Weeks</p>
+        <div class="card" style="margin-bottom:1rem;">
+            <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What is your overall theme or intention for the next two weeks?</p>
+            <textarea id="plan-theme" rows="2" placeholder="One word, phrase, or sentence that frames the next two weeks…"></textarea>
+        </div>
+        <div class="plan-grid">
+            <div class="plan-card plan-card-rcbs">
+                <p class="plan-label plan-label-rcbs">RCBS</p>
+                <p style="font-size:11px;color:#3C3489;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-rcbs" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
             </div>
-            <div>
-                <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What are you carrying into next week?</p>
-                <textarea rows="5" placeholder="Intentions, posture, focus…"></textarea>
+            <div class="plan-card plan-card-rws">
+                <p class="plan-label plan-label-rws">RWS</p>
+                <p style="font-size:11px;color:#085041;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-rws" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
+            </div>
+            <div class="plan-card plan-card-sm">
+                <p class="plan-label plan-label-sm">SM</p>
+                <p style="font-size:11px;color:#712B13;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-sm" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
+            </div>
+            <div class="plan-card plan-card-mts">
+                <p class="plan-label plan-label-mts">MTS</p>
+                <p style="font-size:11px;color:#633806;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-mts" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
+            </div>
+            <div class="plan-card plan-card-eplc plan-full">
+                <p class="plan-label plan-label-eplc">EPLC</p>
+                <p style="font-size:11px;color:#0C447C;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-eplc" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
             </div>
         </div>
-        <button class="btn btn-primary btn-full">Save reflection to Notion →</button>
+        <button class="btn btn-primary btn-full" style="margin-top:4px;">Save Plan to Notion →</button>
     </div>
 
     <script>
@@ -1071,43 +1273,57 @@
     const dates = getReviewDates();
     document.getElementById('weekLabel').textContent =
     'Week ending ' + formatDate(dates.weekEnd) + ' · Looking ahead to ' + formatDate(dates.week2End);
-    document.getElementById('weekEndLabel').textContent = formatDate(dates.weekEnd);
     document.getElementById('habitWeekLabel').textContent = formatDate(dates.weekEnd);
     document.getElementById('week1Label').textContent =
     'Week 1 · ' + formatDate(dates.week1Start) + ' – ' + formatDate(dates.week1End);
     document.getElementById('week2Label').textContent =
     'Week 2 · ' + formatDate(dates.week2Start) + ' – ' + formatDate(dates.week2End);
 
-    let activeFilter = null;
+    let activeDomain = null;
+    let activeProject = null;
 
-    function toggleFilter(domain) {
-        if (activeFilter === domain) {
-            clearFilter();
-            return;
-        }
-        activeFilter = domain;
-        document.querySelectorAll('#filterBar .domain-pill').forEach(p => {
-            p.classList.remove('pill-active-rcbs', 'pill-active-rws', 'pill-active-sm', 'pill-active-mts', 'pill-active-eplc');
-            if (p.dataset.domain === domain)
-                p.classList.add('pill-active-' + domain);
-        });
-        document.querySelectorAll('.project-row[data-domain], .task-row[data-domain]').forEach(row => {
-            const isMatch = row.dataset.domain === domain;
-            row.classList.toggle('hidden', !isMatch);
+    function applyFilters() {
+        document.querySelectorAll('.project-row[data-domain]').forEach(row => {
+            const show = (!activeDomain || row.dataset.domain === activeDomain) &&
+            (!activeProject || row.dataset.project === activeProject);
+            row.classList.toggle('hidden', !show);
             const next = row.nextElementSibling;
             if (next && next.classList.contains('progress-wrap'))
-                next.classList.toggle('hidden', !isMatch);
+                next.classList.toggle('hidden', !show);
+        });
+        document.querySelectorAll('.task-row[data-domain]').forEach(row => {
+            const show = (!activeDomain || row.dataset.domain === activeDomain) &&
+            (!activeProject || row.dataset.project === activeProject);
+            row.classList.toggle('hidden', !show);
         });
     }
 
-    function clearFilter() {
-        activeFilter = null;
+    function toggleDomain(domain) {
+        activeDomain = activeDomain === domain ? null : domain;
+        document.querySelectorAll('#filterBar .domain-pill').forEach(p => {
+            p.classList.remove('pill-active-rcbs', 'pill-active-rws', 'pill-active-sm', 'pill-active-mts', 'pill-active-eplc');
+            if (p.dataset.domain === activeDomain)
+                p.classList.add('pill-active-' + activeDomain);
+        });
+        applyFilters();
+    }
+
+    function toggleProject(project) {
+        activeProject = activeProject === project ? null : project;
+        document.querySelectorAll('#projectBar .pill-project').forEach(p => {
+            p.classList.toggle('active', p.dataset.project === activeProject);
+        });
+        applyFilters();
+    }
+
+    function clearFilters() {
+        activeDomain = null;
+        activeProject = null;
         document.querySelectorAll('#filterBar .domain-pill').forEach(p => {
             p.classList.remove('pill-active-rcbs', 'pill-active-rws', 'pill-active-sm', 'pill-active-mts', 'pill-active-eplc');
         });
-        document.querySelectorAll('.project-row[data-domain], .task-row[data-domain], .progress-wrap').forEach(r => {
-            r.classList.remove('hidden');
-        });
+        document.querySelectorAll('#projectBar .pill-project').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.project-row[data-domain], .task-row[data-domain], .progress-wrap').forEach(r => r.classList.remove('hidden'));
     }
 
     function toggleStar(el) {
@@ -1115,6 +1331,29 @@
         el.classList.toggle('star-on', !on);
         el.classList.toggle('star-off', on);
         el.textContent = on ? '☆' : '★';
+    }
+
+    function toggleTime(el) {
+        document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function hardReset() {
+        if (!confirm('Reset the dashboard? This will clear all stars, filters, and reflection fields.'))
+            return;
+        clearFilters();
+        document.querySelectorAll('.star').forEach(s => {
+            s.classList.remove('star-on');
+            s.classList.add('star-off');
+            s.textContent = '☆';
+        });
+        document.querySelectorAll('textarea').forEach(t => t.value = '');
+        document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+        document.querySelectorAll('.time-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     }
     </script>
 </body>

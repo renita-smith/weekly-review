@@ -402,6 +402,1649 @@
         background: #f5f4f0;
         border-radius: 8px;
         padding: 6px 4px;
+        min-height: 72px;
+    }
+
+    .cal-day-label {
+        font-size: 10px;
+        font-weight: 500;
+        color: #888;
+        text-align: center;
+        margin-bottom: 4px;
+    }
+
+    .cal-event {
+        font-size: 10px;
+        padding: 2px 4px;
+        border-radius: 4px;
+        margin-bottom: 2px;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ev-personal {
+        background: #EEEDFE;
+        color: #3C3489;
+    }
+
+    .ev-mts {
+        background: #FAEEDA;
+        color: #633806;
+    }
+
+    .ev-sm {
+        background: #FAECE7;
+        color: #712B13;
+    }
+
+    .ev-rws {
+        background: #E1F5EE;
+        color: #085041;
+    }
+
+    .ev-eplc {
+        background: #E6F1FB;
+        color: #0C447C;
+    }
+
+    .ev-default {
+        background: #f0efe9;
+        color: #555;
+    }
+
+    .week-divider {
+        font-size: 11px;
+        font-weight: 500;
+        color: #888;
+        margin: 10px 0 6px;
+        padding-bottom: 4px;
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .hidden {
+        opacity: 0.15;
+        pointer-events: none;
+    }
+
+    .reflect-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    textarea {
+        width: 100%;
+        font-size: 13px;
+        resize: none;
+        border: 0.5px solid #ccc;
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: #f5f4f0;
+        color: #1a1a1a;
+        font-family: inherit;
+        line-height: 1.5;
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: #888;
+    }
+
+    .btn {
+        font-size: 13px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 0.5px solid #bbb;
+        background: #fff;
+        cursor: pointer;
+        color: #1a1a1a;
+        transition: background 0.15s;
+    }
+
+    .btn:hover {
+        background: #f0efe9;
+    }
+
+    .btn-full {
+        width: 100%;
+    }
+
+    .btn-primary {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #1a1a1a;
+    }
+
+    .btn-primary:hover {
+        background: #333;
+    }
+
+    .btn-reset {
+        background: #fff;
+        color: #a32d2d;
+        border-color: #a32d2d;
+        font-size: 12px;
+        padding: 6px 14px;
+    }
+
+    .btn-reset:hover {
+        background: #fceded;
+    }
+
+    .btn-gcal {
+        background: #4285F4;
+        color: #fff;
+        border-color: #4285F4;
+        font-size: 12px;
+        padding: 6px 14px;
+    }
+
+    .btn-gcal:hover {
+        background: #3367d6;
+    }
+
+    .carried-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .carried-row:last-child {
+        border-bottom: none;
+    }
+
+    .overdue-check {
+        width: 16px;
+        height: 16px;
+        border: 0.5px solid #a32d2d;
+        border-radius: 4px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .overdue-name {
+        font-size: 14px;
+        color: #a32d2d;
+        margin: 0 0 2px;
+    }
+
+    .overdue-sub {
+        font-size: 12px;
+        color: #888;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+
+    .header-btns {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .jump-bar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .jump-btn {
+        font-size: 12px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        border: 0.5px solid #ccc;
+        background: #fff;
+        cursor: pointer;
+        color: #555;
+        transition: background 0.15s;
+    }
+
+    .jump-btn:hover {
+        background: #f0efe9;
+    }
+
+    .plan-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .plan-card {
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        border: 0.5px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .plan-card-rcbs {
+        background: #EEEDFE;
+    }
+
+    .plan-card-rws {
+        background: #E1F5EE;
+    }
+
+    .plan-card-sm {
+        background: #FAECE7;
+    }
+
+    .plan-card-mts {
+        background: #FAEEDA;
+    }
+
+    .plan-card-eplc {
+        background: #E6F1FB;
+    }
+
+    .plan-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
+    }
+
+    .plan-label-rcbs {
+        color: #3C3489;
+    }
+
+    .plan-label-rws {
+        color: #085041;
+    }
+
+    .plan-label-sm {
+        color: #712B13;
+    }
+
+    .plan-label-mts {
+        color: #633806;
+    }
+
+    .plan-label-eplc {
+        color: #0C447C;
+    }
+
+    .plan-card textarea {
+        background: rgba(255, 255, 255, 0.6);
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .plan-full {
+        grid-column: 1/-1;
+    }
+
+    .loading {
+        color: #888;
+        font-size: 13px;
+        padding: 12px 0;
+        text-align: center;
+    }
+
+    .empty {
+        color: #bbb;
+        font-size: 13px;
+        padding: 12px 0;
+        text-align: center;
+    }
+
+    .error-msg {
+        color: #a32d2d;
+        font-size: 12px;
+        padding: 8px;
+        background: #fceded;
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
+
+    .cal-signin {
+        text-align: center;
+        padding: 16px 0;
+    }
+
+    .cal-source {
+        font-size: 10px;
+        color: #bbb;
+        margin-top: 2px;
+        text-align: center;
+    }
+    </style>
+</head>
+<body>
+
+    <div class="header-row">
+        <div>
+            <h1>Weekly Review</h1>
+            <p class="subtitle" id="weekLabel">Loading dates…</p>
+        </div>
+        <div class="header-btns">
+            <button class="btn btn-gcal" id="gcal-btn" onclick="handleGCalAuth()">📅 Connect Calendar</button>
+            <button class="btn btn-reset" onclick="hardReset()">↺ Reset</button>
+        </div>
+    </div>
+
+    <div class="jump-bar">
+        <button class="jump-btn" onclick="document.getElementById('sec-inbox').scrollIntoView({behavior:'smooth'})">📥 Notes Inbox</button>
+        <button class="jump-btn" onclick="document.getElementById('sec-undone').scrollIntoView({behavior:'smooth'})">⚠️ What Didn't Get Done</button>
+        <button class="jump-btn" onclick="document.getElementById('sec-habits').scrollIntoView({behavior:'smooth'})">🔵 Habit Pulse</button>
+        <button class="jump-btn" onclick="document.getElementById('sec-reflection').scrollIntoView({behavior:'smooth'})">✍️ Weekly Reflection</button>
+        <button class="jump-btn" onclick="document.getElementById('sec-plan').scrollIntoView({behavior:'smooth'})">🎯 Plan Ahead</button>
+    </div>
+
+    <div class="grid-5">
+        <div class="metric">
+            <p class="metric-label">Active projects</p>
+            <p class="metric-value" id="metric-projects">—</p>
+        </div>
+        <div class="metric">
+            <p class="metric-label">Tasks · next 2 wks</p>
+            <p class="metric-value" id="metric-tasks">—</p>
+        </div>
+        <div class="metric">
+            <p class="metric-label">Overdue tasks</p>
+            <p class="metric-value danger" id="metric-overdue">—</p>
+        </div>
+        <div class="metric">
+            <p class="metric-label">Unprocessed notes</p>
+            <p class="metric-value" id="metric-notes">—</p>
+        </div>
+        <div class="metric">
+            <p class="metric-label">Habit avg this week</p>
+            <p class="metric-value" id="metric-habits">—</p>
+        </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <p class="section-title" style="margin:0;">Domains</p>
+        <div class="filter-bar" style="margin:0;">
+            <span class="time-pill active" onclick="toggleTime(this)">This Week</span>
+            <span class="time-pill" onclick="toggleTime(this)">Next Week</span>
+            <span class="time-pill" onclick="toggleTime(this)">Next Two Weeks</span>
+        </div>
+    </div>
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div class="dist-bar-wrap" id="dist-bar">
+            <div class="dist-seg" style="width:100%;background:#eee;"></div>
+        </div>
+        <div class="dist-legend" id="dist-legend">
+            <span class="loading">Loading domain data…</span>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <p class="section-title">Two-Week Outlook — Calendar</p>
+    <div class="card" style="margin-bottom:1.5rem;">
+        <p class="week-divider" id="week1Label">Week 1</p>
+        <div class="cal-week" id="cal-week1">
+            <div class="cal-day">
+                <p class="cal-day-label">Sun</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Mon</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Tue</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Wed</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Thu</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Fri</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Sat</p>
+            </div>
+        </div>
+        <p class="week-divider" id="week2Label">Week 2</p>
+        <div class="cal-week" id="cal-week2">
+            <div class="cal-day">
+                <p class="cal-day-label">Sun</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Mon</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Tue</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Wed</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Thu</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Fri</p>
+            </div>
+            <div class="cal-day">
+                <p class="cal-day-label">Sat</p>
+            </div>
+        </div>
+        <div id="cal-status" class="cal-signin">
+            <p style="font-size:13px;color:#888;">Click "Connect Calendar" above to load your Google Calendar events.</p>
+        </div>
+        <p class="cal-source">Pulls from: Personal Google Calendar · MTS Google Calendar</p>
+    </div>
+
+    <p class="section-title">Filter By Domain</p>
+    <div class="filter-bar" id="filterBar" style="margin-bottom:6px;">
+        <span class="domain-pill pill-rcbs" data-domain="RCBS" onclick="toggleDomain('RCBS')">RCBS</span>
+        <span class="domain-pill pill-rws" data-domain="RWS" onclick="toggleDomain('RWS')">RWS</span>
+        <span class="domain-pill pill-sm" data-domain="SM" onclick="toggleDomain('SM')">SM</span>
+        <span class="domain-pill pill-mts" data-domain="MTS" onclick="toggleDomain('MTS')">MTS</span>
+        <span class="domain-pill pill-eplc" data-domain="EPLC" onclick="toggleDomain('EPLC')">EPLC</span>
+        <span class="clear-filter" onclick="clearFilters()">Clear</span>
+    </div>
+    <p class="section-title" style="margin-top:8px;">Filter By Project</p>
+    <div class="filter-bar" id="projectBar" style="margin-bottom:1.5rem;">
+        <span class="loading">Loading projects…</span>
+    </div>
+
+    <div class="grid-2">
+        <div>
+            <p class="section-title">Active Projects — Set Priorities</p>
+            <div class="card" id="projects-list">
+                <p class="loading">Loading projects…</p>
+            </div>
+        </div>
+        <div>
+            <p class="section-title">Tasks — Next Two Weeks</p>
+            <div class="card" id="tasks-list">
+                <p class="loading">Loading tasks…</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-inbox">
+        <p class="section-title">Note Inbox — Process &amp; Assign</p>
+        <div class="card" style="margin-bottom:1.5rem;" id="notes-list">
+            <p class="loading">Loading notes…</p>
+        </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:1.5rem;">
+        <div id="sec-habits">
+            <p class="section-title">
+                Habit Pulse — Week Ending 
+                <span id="habitWeekLabel"></span>
+            </p>
+            <div class="card">
+                <p style="font-size:12px;color:#888;margin-bottom:10px;">Tap dots to log this week from Habitify:</p>
+                <div class="habit-row">
+                    <span class="habit-name">Morning stretch</span>
+                    <div class="habit-score" id="h0"></div>
+                </div>
+                <div class="habit-row">
+                    <span class="habit-name">Daily bread</span>
+                    <div class="habit-score" id="h1"></div>
+                </div>
+                <div class="habit-row">
+                    <span class="habit-name">Prayer / quiet time</span>
+                    <div class="habit-score" id="h2"></div>
+                </div>
+                <div class="habit-row">
+                    <span class="habit-name">Highlight journaling</span>
+                    <div class="habit-score" id="h3"></div>
+                </div>
+                <div class="habit-row">
+                    <span class="habit-name">Make up bed</span>
+                    <div class="habit-score" id="h4"></div>
+                </div>
+                <div class="habit-row">
+                    <span class="habit-name">Daily declaration</span>
+                    <div class="habit-score" id="h5"></div>
+                </div>
+                <div class="habit-row">
+                    <span class="habit-name">Step count</span>
+                    <div class="habit-score" id="h6"></div>
+                </div>
+                <div class="habit-row">
+                    <span class="habit-name">Exercise</span>
+                    <div class="habit-score" id="h7"></div>
+                </div>
+                <div class="habit-row">
+                    <span class="habit-name">Next day prep</span>
+                    <div class="habit-score" id="h8"></div>
+                </div>
+            </div>
+        </div>
+        <div id="sec-undone">
+            <p class="section-title">What Didn't Get Done</p>
+            <div class="card" id="overdue-list">
+                <p class="loading">Loading overdue tasks…</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-reflection">
+        <p class="section-title">Weekly Reflection</p>
+        <div class="card" style="margin-bottom:1.5rem;">
+            <div class="reflect-grid">
+                <div>
+                    <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What moved the needle?</p>
+                    <textarea id="ref-needle" rows="5" placeholder="Your biggest win this week…"></textarea>
+                </div>
+                <div>
+                    <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What didn't work?</p>
+                    <textarea id="ref-didnt" rows="5" placeholder="What you'd do differently…"></textarea>
+                </div>
+                <div>
+                    <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What are you carrying into next week?</p>
+                    <textarea id="ref-carry" rows="5" placeholder="Intentions, posture, focus…"></textarea>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveReflection()">Save Reflection to Notion →</button>
+        </div>
+    </div>
+
+    <div id="sec-plan">
+        <p class="section-title">Plan Ahead — Next Two Weeks</p>
+        <div class="card" style="margin-bottom:1rem;">
+            <p style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px;">What is your overall theme or intention for the next two weeks?</p>
+            <textarea id="plan-theme" rows="2" placeholder="One word, phrase, or sentence that frames the next two weeks…"></textarea>
+        </div>
+        <div class="plan-grid">
+            <div class="plan-card plan-card-rcbs">
+                <p class="plan-label plan-label-rcbs">RCBS</p>
+                <p style="font-size:11px;color:#3C3489;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-rcbs" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
+            </div>
+            <div class="plan-card plan-card-rws">
+                <p class="plan-label plan-label-rws">RWS</p>
+                <p style="font-size:11px;color:#085041;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-rws" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
+            </div>
+            <div class="plan-card plan-card-sm">
+                <p class="plan-label plan-label-sm">SM</p>
+                <p style="font-size:11px;color:#712B13;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-sm" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
+            </div>
+            <div class="plan-card plan-card-mts">
+                <p class="plan-label plan-label-mts">MTS</p>
+                <p style="font-size:11px;color:#633806;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-mts" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
+            </div>
+            <div class="plan-card plan-card-eplc plan-full">
+                <p class="plan-label plan-label-eplc">EPLC</p>
+                <p style="font-size:11px;color:#0C447C;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-eplc" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
+            </div>
+        </div>
+        <button class="btn btn-primary btn-full" style="margin-top:4px;" onclick="savePlan()">Save Plan to Notion →</button>
+    </div>
+
+    <!-- Google API -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+
+    <script>
+    // ─── CONFIG — FILL IN YOUR VALUES ─────────────────────────
+    const GCAL_CLIENT_ID = '435629248291-1upcl99q2u3grdaaa3pfice92bfnkamm.apps.googleusercontent.com';
+    const GCAL_CALENDARS = [
+    {
+        id: 'renitacbsmith@gmail.com',
+        label: 'Personal',
+        cssClass: 'ev-personal'
+    },
+    {
+        id: 'rs@michouthesolutionist.com',
+        label: 'MTS',
+        cssClass: 'ev-mts'
+    },
+    ];
+
+    // ─── NOTION CONFIG ────────────────────────────────────────
+    const DB_PROJECTS = '32110b0385a88054b94bfda7d3e93ddb';
+    const DB_TASKS = '32110b0375b880c18918ebac71592a36';
+    const DB_NOTES = '6340f2b86ac84447a8315f0ba87645e4';
+    const PROXY = 'https://notion-proxy.renitacbsmith.workers.dev/v1';
+
+    const DOMAIN_STYLE = {
+        RCBS: {
+            pill: 'pill-rcbs',
+            color: '#7F77DD'
+        },
+        RWS: {
+            pill: 'pill-rws',
+            color: '#1D9E75'
+        },
+        SM: {
+            pill: 'pill-sm',
+            color: '#D85A30'
+        },
+        MTS: {
+            pill: 'pill-mts',
+            color: '#EF9F27'
+        },
+        EPLC: {
+            pill: 'pill-eplc',
+            color: '#378ADD'
+        },
+    };
+
+    // ─── DATES ────────────────────────────────────────────────
+    function formatDate(d) {
+        return d.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+    function getReviewDates() {
+        const today = new Date();
+        const day = today.getDay();
+        const sat = new Date(today);
+        sat.setDate(today.getDate() + ((6 - day + 7) % 7));
+        const w1s = new Date(sat);
+        w1s.setDate(sat.getDate() + 1);
+        const w1e = new Date(w1s);
+        w1e.setDate(w1s.getDate() + 6);
+        const w2s = new Date(w1e);
+        w2s.setDate(w1e.getDate() + 1);
+        const w2e = new Date(w2s);
+        w2e.setDate(w2s.getDate() + 6);
+        return {
+            weekEnd: sat,
+            w1s,
+            w1e,
+            w2s,
+            w2e
+        };
+    }
+    const DATES = getReviewDates();
+    document.getElementById('weekLabel').textContent = 'Week ending ' + formatDate(DATES.weekEnd) + ' · Looking ahead to ' + formatDate(DATES.w2e);
+    document.getElementById('habitWeekLabel').textContent = formatDate(DATES.weekEnd);
+    document.getElementById('week1Label').textContent = 'Week 1 · ' + formatDate(DATES.w1s) + ' – ' + formatDate(DATES.w1e);
+    document.getElementById('week2Label').textContent = 'Week 2 · ' + formatDate(DATES.w2s) + ' – ' + formatDate(DATES.w2e);
+
+    // ─── GOOGLE CALENDAR ──────────────────────────────────────
+    let gcalToken = null;
+
+    function handleGCalAuth() {
+        if (gcalToken) {
+            loadCalendarEvents();
+            return;
+        }
+        const client = google.accounts.oauth2.initTokenClient({
+            client_id: GCAL_CLIENT_ID,
+            scope: 'https://www.googleapis.com/auth/calendar.readonly',
+            callback: (response) => {
+                if (response.access_token) {
+                    gcalToken = response.access_token;
+                    document.getElementById('gcal-btn').textContent = '📅 Refresh Calendar';
+                    loadCalendarEvents();
+                }
+            },
+        });
+        client.requestAccessToken();
+    }
+
+    async function loadCalendarEvents() {
+        document.getElementById('cal-status').innerHTML = '<p class="loading">Loading calendar events…</p>';
+
+        const timeMin = DATES.w1s.toISOString();
+        const timeMax = DATES.w2e.toISOString();
+
+        const allEvents = [];
+
+        for (const cal of GCAL_CALENDARS) {
+            try {
+                const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(cal.id)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
+                const res = await fetch(url, {
+                    headers: {
+                        'Authorization': 'Bearer ' + gcalToken
+                    }
+                });
+                const data = await res.json();
+                if (data.items) {
+                    data.items.forEach(e => allEvents.push({
+                        ...e,
+                        calLabel: cal.label,
+                        calClass: cal.cssClass
+                    }));
+                }
+            } catch (e) {
+                console.error('Calendar fetch error:', e);
+            }
+        }
+
+        renderCalendar(allEvents);
+        document.getElementById('cal-status').style.display = 'none';
+    }
+
+    function renderCalendar(events) {
+        // Build day cells for both weeks
+        const weeks = [
+        {
+            containerId: 'cal-week1',
+            startDate: DATES.w1s
+        },
+        {
+            containerId: 'cal-week2',
+            startDate: DATES.w2s
+        },
+        ];
+
+        weeks.forEach(({containerId, startDate}) => {
+            const container = document.getElementById(containerId);
+            const days = container.querySelectorAll('.cal-day');
+            days.forEach((dayEl, i) => {
+                const d = new Date(startDate);
+                d.setDate(startDate.getDate() + i);
+                const dateStr = d.toLocaleDateString('en-US', {
+                    month: 'numeric',
+                    day: 'numeric'
+                });
+                const dayLabel = d.toLocaleDateString('en-US', {
+                    weekday: 'short'
+                }).slice(0, 3) + ' ' + d.getDate();
+                dayEl.innerHTML = `<p class="cal-day-label">${dayLabel}</p>`;
+
+                // Find events for this day
+                const dayEvents = events.filter(e => {
+                    const start = e.start?.dateTime||e.start?.date;
+                    if (!start)
+                        return false;
+                    const eDate = new Date(start);
+                    return eDate.toDateString() === d.toDateString();
+                });
+
+                dayEvents.forEach(e => {
+                    const title = e.summary || 'Event';
+                    const time = e.start?.dateTime
+                    ? new Date(e.start.dateTime).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit'
+                    })
+                    : 'All day';
+                    dayEl.innerHTML += `<div class="cal-event ${e.calClass}" title="${title} · ${e.calLabel}">${title}</div>`;
+                });
+            });
+        });
+    }
+
+    // ─── NOTION API ───────────────────────────────────────────
+    async function notionQuery(dbId, filter) {
+        const res = await fetch(`${PROXY}/databases/${dbId}/query`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            },
+            body: JSON.stringify(filter ? {
+                filter
+            } : {}),
+        });
+        if (!res.ok)
+            throw new Error('Notion API error ' + res.status);
+        return (await res.json()).results || [];
+    }
+
+    async function notionCreate(dbId, properties) {
+        const res = await fetch(`${PROXY}/pages`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            },
+            body: JSON.stringify({
+                parent: {
+                    database_id: dbId
+                },
+                properties
+            }),
+        });
+        if (!res.ok)
+            throw new Error('Notion create error ' + res.status);
+        return res.json();
+    }
+
+    async function notionPatch(pageId, properties) {
+        const res = await fetch(`${PROXY}/pages/${pageId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            },
+            body: JSON.stringify({
+                properties
+            }),
+        });
+        if (!res.ok)
+            throw new Error('Notion patch error ' + res.status);
+        return res.json();
+    }
+
+    // ─── HELPERS ──────────────────────────────────────────────
+    function getTitle(page) {
+        for (const key of Object.keys(page.properties)) {
+            const p = page.properties[key];
+            if (p.type === 'title'&&p.title?.length)
+                return p.title.map(r => r.plain_text).join('');
+        }
+        return 'Untitled';
+    }
+
+    function getDomain(page) {
+        const props = page.properties;
+        for (const key of ['Pillar', 'Domain', 'Pillars']) {
+            if (!props[key])
+                continue;
+            if (props[key].type === 'select' && props[key].select)
+                return props[key].select.name;
+            if (props[key].type === 'rollup'&&props[key].rollup?.array?.length) {
+                for (const item of props[key].rollup.array) {
+                    if (item.type === 'title'&&item.title?.length)
+                        return item.title[0].plain_text;
+                }
+            }
+        }
+        return null;
+    }
+
+    function getProgress(page) {
+        const p=page.properties?.Progress;
+        if (!p)
+            return 0;
+        if (p.type === 'rollup' && p.rollup?.type === 'number')
+            return Math.round((p.rollup.number || 0) * 100);
+        if (p.type === 'number' && p.number !== null)
+            return Math.round((p.number || 0) * 100);
+        return 0;
+    }
+
+    function getDueDate(page) {
+        for (const key of ['Due Date', 'Due date', 'DueDate', 'Target Deadline']) {
+            const d=page.properties?.[key];
+            if (d?.type === 'date'&&d.date?.start)
+                return new Date(d.date.start);
+        }
+        return null;
+    }
+
+    function getCreatedDate(page) {
+        if (page.created_time)
+            return new Date(page.created_time);
+        return new Date();
+    }
+
+    function pillHtml(domain, small) {
+        const style = DOMAIN_STYLE[domain];
+        const cls = style ? style.pill : 'pill-unknown';
+        const sz = small ? 'font-size:11px;padding:1px 7px;' : '';
+        return `<span class="domain-pill ${cls}" style="cursor:default;${sz}">${domain || '?'}</span>`;
+    }
+
+    function daysAgo(date) {
+        const diff = Math.floor((Date.now() - date.getTime()) / 86400000);
+        if (diff === 0)
+            return 'Today';
+        if (diff === 1)
+            return '1 day ago';
+        return diff + ' days ago';
+    }
+
+    function domainColor(d) {
+        return DOMAIN_STYLE[d]?.color || '#ccc';
+    }
+
+    // ─── FILTER STATE ─────────────────────────────────────────
+    let activeDomain = null,
+        activeProject = null;
+
+    function applyFilters() {
+        document.querySelectorAll('.project-row[data-domain]').forEach(row => {
+            const show = (!activeDomain || row.dataset.domain === activeDomain) &&
+            (!activeProject || row.dataset.project === activeProject);
+            row.classList.toggle('hidden', !show);
+            const next = row.nextElementSibling;
+            if(next?.classList.contains('progress-wrap'))
+                next.classList.toggle('hidden', !show);
+        });
+        document.querySelectorAll('.task-row[data-domain]').forEach(row => {
+            const show = (!activeDomain || row.dataset.domain === activeDomain) &&
+            (!activeProject || row.dataset.project === activeProject);
+            row.classList.toggle('hidden', !show);
+        });
+    }
+
+    function toggleDomain(domain) {
+        activeDomain = activeDomain === domain ? null : domain;
+        document.querySelectorAll('#filterBar .domain-pill').forEach(p => {
+            p.classList.remove('pill-active-rcbs', 'pill-active-rws', 'pill-active-sm', 'pill-active-mts', 'pill-active-eplc');
+            if (p.dataset.domain === activeDomain)
+                p.classList.add('pill-active-' + activeDomain.toLowerCase());
+        });
+        applyFilters();
+    }
+
+    function toggleProject(id) {
+        activeProject = activeProject === id ? null : id;
+        document.querySelectorAll('#projectBar .pill-project').forEach(p => p.classList.toggle('active', p.dataset.project === activeProject));
+        applyFilters();
+    }
+
+    function clearFilters() {
+        activeDomain = null;
+        activeProject = null;
+        document.querySelectorAll('#filterBar .domain-pill').forEach(p =>
+        p.classList.remove('pill-active-rcbs', 'pill-active-rws', 'pill-active-sm', 'pill-active-mts', 'pill-active-eplc'));
+        document.querySelectorAll('#projectBar .pill-project').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.project-row[data-domain],.task-row[data-domain],.progress-wrap').forEach(r => r.classList.remove('hidden'));
+    }
+
+    function toggleStar(el) {
+        const on = el.classList.contains('star-on');
+        el.classList.toggle('star-on', !on);
+        el.classList.toggle('star-off', on);
+        el.textContent = on ? '☆' : '★';
+    }
+
+    function toggleTime(el) {
+        document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    // ─── RENDER PROJECTS ──────────────────────────────────────
+    function renderProjects(pages) {
+        const list = document.getElementById('projects-list');
+        const bar = document.getElementById('projectBar');
+        if (!pages.length) {
+            list.innerHTML = '<p class="empty">No active projects found</p>';
+            bar.innerHTML = '';
+            return;
+        }
+
+        const domainCount = {};
+        pages.forEach(p => {
+            const d = getDomain(p);
+            if (d)
+                domainCount[d] = (domainCount[d] || 0) + 1;
+        });
+        const total = pages.length;
+
+        document.getElementById('dist-bar').innerHTML = Object.entries(domainCount).map(([d, c]) =>
+        `<div class="dist-seg" style="width:${Math.round(c / total * 100)}%;background:${domainColor(d)};"></div>`).join('');
+        document.getElementById('dist-legend').innerHTML = Object.entries(domainCount).map(([d, c]) =>
+        `<div class="dist-item"><div class="dist-dot" style="background:${domainColor(d)};"></div>${d} ${Math.round(c / total * 100)}%</div>`).join('');
+
+        bar.innerHTML = pages.map(p =>
+        `<span class="pill-project" data-project="${p.id}" onclick="toggleProject('${p.id}')">${getTitle(p)}</span>`
+        ).join('') + `<span class="clear-filter" onclick="clearFilters()">Clear</span>`;
+
+        list.innerHTML = pages.map(p => {
+            const domain = getDomain(p) || '?';
+            const prog = getProgress(p);
+            return `
+      <div class="project-row" data-domain="${domain}" data-project="${p.id}">
+        <span class="star star-off" onclick="toggleStar(this)">☆</span>
+        <span class="project-name">${
+            getTitle(p)}</span>
+        ${pillHtml(domain, true)}
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" style="width:${
+
+            prog}%;background:${domainColor(domain)};"></div></div>
+      </div>`
+            ;
+        }).join('');
+
+        document.getElementById('metric-projects').textContent = pages.length;
+    }
+
+    // ─── RENDER TASKS ─────────────────────────────────────────
+    function renderTasks(pages, projectMap) {
+        const list = document.getElementById('tasks-list');
+        const overdEl = document.getElementById('overdue-list');
+        const now = new Date();
+        const twoWks = new Date();
+        twoWks.setDate(now.getDate() + 14);
+
+        const upcoming = pages.filter(p => {
+            const d = getDueDate(p);
+            return d && d >= now && d <= twoWks;
+        });
+        const overdue = pages.filter(p => {
+            const d = getDueDate(p);
+            return d && d < now;
+        });
+
+        document.getElementById('metric-tasks').textContent = upcoming.length;
+        document.getElementById('metric-overdue').textContent = overdue.length;
+
+        list.innerHTML = !upcoming.length ? '<p class="empty">No tasks due in the next two weeks</p>' :
+        upcoming.map(p => {
+            const domain = getDomain(p) || '?';
+            const due = getDueDate(p);
+            const dateStr = due ? due.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
+            }) : '';
+            const projId = p.properties?.Project?.relation?.[0]?.id || null;
+            const projName = projId && projectMap[projId] ? projectMap[projId] : '';
+            const projPill = projName ? `<span class="pill-project" style="cursor:default;">${projName}</span>` : '';
+            return `
+        <div class="task-row" data-domain="${domain}" data-project="${projId || ''}">
+          <div class="task-check"></div>
+          <div style="flex:1;">
+            <p class="task-name">${
+
+            getTitle(p)}</p>
+            <p class="task-meta">${dateStr} · ${pillHtml(domain, true)}${projPill}</p>
+          </div>
+        </div>`
+
+            ;
+        }).join('');
+
+        overdEl.innerHTML = !overdue.length ? '<p class="empty">Nothing carried over — nice work.</p>' :
+        overdue.map(p => {
+            const domain = getDomain(p) || '?';
+            return `
+        <div class="carried-row">
+          <div class="overdue-check"></div>
+          <div style="flex:1;">
+            <p class="overdue-name">${
+
+
+            getTitle(p)}</p>
+            <p class="overdue-sub">Overdue · ${pillHtml(domain, true)}</p>
+          </div>
+        </div>`
+
+            ;
+        }).join('');
+    }
+
+    // ─── RENDER NOTES ─────────────────────────────────────────
+    function renderNotes(pages) {
+        const list = document.getElementById('notes-list');
+        document.getElementById('metric-notes').textContent = pages.length;
+        if (!pages.length) {
+            list.innerHTML = '<p class="empty">Inbox zero — all notes are processed.</p>';
+            return;
+        }
+
+        const now = Date.now();
+        const oneWk = 7 * 86400000;
+        const thisWk = pages.filter(p => now - getCreatedDate(p).getTime() <= oneWk);
+        const older = pages.filter(p => now - getCreatedDate(p).getTime() > oneWk);
+
+        function noteRow(p) {
+            return `
+      <div class="note-row" data-page-id="${p.id}">
+        <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
+        <span class="note-title">${
+            getTitle(p)}</span>
+        <span class="note-select">
+          <select onchange="assignDomain('${
+            p.id}',this.value)">
+            <option value="">Assign domain…</option>
+            <option>RCBS</option><option>RWS</option><option>SM</option><option>MTS</option><option>EPLC</option>
+          </select>
+        </span>
+        <span class="note-age">${
+
+
+
+            daysAgo(getCreatedDate(p))}</span>
+      </div>`
+            ;
+        }
+
+        list.innerHTML =
+        (thisWk.length ? `<p style="font-size:12px;font-weight:500;color:#888;margin-bottom:8px;">This Week</p>${thisWk.map(noteRow).join('')}` : '') +
+        (older.length ? `<p style="font-size:12px;font-weight:500;color:#888;margin:12px 0 8px;">Older</p>${older.map(noteRow).join('')}` : '');
+    }
+
+    // ─── HABITS ───────────────────────────────────────────────
+    function buildHabitDots() {
+        for (let i = 0; i < 9; i++) {
+            const el = document.getElementById('h' + i);
+            if (!el)
+                continue;
+            el.innerHTML = Array.from({
+                length: 7
+            }, (_, d) =>
+            `<div class="habit-dot dot-miss" onclick="toggleHabit(this)" style="cursor:pointer;" title="Day ${d + 1}"></div>`
+            ).join('');
+        }
+    }
+
+    function toggleHabit(el) {
+        el.classList.toggle('dot-done');
+        el.classList.toggle('dot-miss');
+        updateHabitAvg();
+    }
+
+    function updateHabitAvg() {
+        const all = document.querySelectorAll('.habit-dot');
+        const done = document.querySelectorAll('.habit-dot.dot-done');
+        const pct = all.length ? Math.round(done.length / all.length * 100) : 0;
+        document.getElementById('metric-habits').textContent = pct + '%';
+    }
+
+    // ─── ASSIGN DOMAIN ────────────────────────────────────────
+    async function assignDomain(pageId, domain) {
+        if (!domain)
+            return;
+        try {
+            await notionPatch(pageId, {
+                Pillar: {
+                    select: {
+                        name: domain
+                    }
+                }
+            });
+            const row = document.querySelector(`[data-page-id="${pageId}"]`);
+            if (row) {
+                row.style.opacity = '0.4';
+                setTimeout(() => row.remove(), 400);
+            }
+            const cur = parseInt(document.getElementById('metric-notes').textContent) || 0;
+            document.getElementById('metric-notes').textContent = Math.max(0, cur - 1);
+        } catch (e) {
+            alert('Could not save to Notion. Please try again.');
+        }
+    }
+
+    // ─── SAVE REFLECTION ──────────────────────────────────────
+    async function saveReflection() {
+        const needle = document.getElementById('ref-needle').value.trim();
+        const didnt = document.getElementById('ref-didnt').value.trim();
+        const carry = document.getElementById('ref-carry').value.trim();
+        if (!needle && !didnt && !carry) {
+            alert('Add at least one reflection before saving.');
+            return;
+        }
+        try {
+            await notionCreate(DB_NOTES, {
+                Name: {
+                    title: [{
+                        text: {
+                            content: 'Weekly Reflection — ' + formatDate(DATES.weekEnd)
+                        }
+                    }]
+                },
+                Pillar: {
+                    select: {
+                        name: 'RCBS'
+                    }
+                },
+            });
+            alert('Reflection saved to Notion!');
+        } catch (e) {
+            alert('Could not save. Please try again.');
+        }
+    }
+
+    // ─── SAVE PLAN ────────────────────────────────────────────
+    async function savePlan() {
+        const theme = document.getElementById('plan-theme').value.trim();
+        const goals = ['rcbs', 'rws', 'sm', 'mts', 'eplc'].map(d => {
+            const v = document.getElementById('plan-' + d).value.trim();
+            return v ? `${d.toUpperCase()}: ${v}` : null;
+        }).filter(Boolean).join('\n');
+        if (!theme && !goals) {
+            alert('Add at least one goal before saving.');
+            return;
+        }
+        try {
+            await notionCreate(DB_NOTES, {
+                Name: {
+                    title: [{
+                        text: {
+                            content: 'Plan Ahead — ' + formatDate(DATES.w1s) + ' to ' + formatDate(DATES.w2e)
+                        }
+                    }]
+                },
+                Pillar: {
+                    select: {
+                        name: 'RCBS'
+                    }
+                },
+            });
+            alert('Plan saved to Notion!');
+        } catch (e) {
+            alert('Could not save. Please try again.');
+        }
+    }
+
+    // ─── RESET ────────────────────────────────────────────────
+    function hardReset() {
+        if (!confirm('Reset the dashboard? This will clear all stars, filters, and text fields.'))
+            return;
+        clearFilters();
+        document.querySelectorAll('.star').forEach(s => {
+            s.classList.remove('star-on');
+            s.classList.add('star-off');
+            s.textContent = '☆';
+        });
+        document.querySelectorAll('textarea').forEach(t => t.value = '');
+        document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+        document.querySelectorAll('.time-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
+        buildHabitDots();
+        document.getElementById('metric-habits').textContent = '—';
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    // ─── INIT ─────────────────────────────────────────────────
+    async function init() {
+        buildHabitDots();
+        try {
+            const [projects, tasks, notes] = await Promise.all([
+            notionQuery(DB_PROJECTS, null),
+            notionQuery(DB_TASKS, null),
+            notionQuery(DB_NOTES, null),
+            ]);
+            const projectMap = {};
+            projects.forEach(p => {
+                projectMap[p.id] = getTitle(p);
+            });
+            renderProjects(projects);
+            renderTasks(tasks, projectMap);
+            renderNotes(notes);
+        } catch (e) {
+            console.error(e);
+            ['projects-list', 'tasks-list', 'notes-list', 'overdue-list'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el)
+                    el.innerHTML = `<p class="error-msg">⚠️ Could not connect to Notion: ${e.message}</p>`;
+            });
+        }
+    }
+
+    init();
+    </script>
+</body>
+</html>
+        font-size: 11px;
+        font-weight: 500;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: 0 0 10px;
+    }
+
+    .card {
+        background: #fff;
+        border: 0.5px solid rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 12px;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .grid-5 {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .metric {
+        background: #f0efe9;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+    }
+
+    .metric-label {
+        font-size: 11px;
+        color: #888;
+        margin-bottom: 2px;
+    }
+
+    .metric-value {
+        font-size: 22px;
+        font-weight: 500;
+    }
+
+    .metric-value.danger {
+        color: #a32d2d;
+    }
+
+    .domain-pill {
+        display: inline-flex;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 3px 10px;
+        border-radius: 20px;
+        cursor: pointer;
+        border: 1.5px solid transparent;
+        transition: all 0.15s;
+        user-select: none;
+    }
+
+    .pill-rcbs {
+        background: #EEEDFE;
+        color: #3C3489;
+    }
+
+    .pill-rws {
+        background: #E1F5EE;
+        color: #085041;
+    }
+
+    .pill-sm {
+        background: #FAECE7;
+        color: #712B13;
+    }
+
+    .pill-mts {
+        background: #FAEEDA;
+        color: #633806;
+    }
+
+    .pill-eplc {
+        background: #E6F1FB;
+        color: #0C447C;
+    }
+
+    .pill-unknown {
+        background: #f0efe9;
+        color: #888;
+    }
+
+    .pill-project {
+        background: #f0efe9;
+        color: #444;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 20px;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        user-select: none;
+        transition: all 0.15s;
+    }
+
+    .pill-project.active {
+        border-color: #1a1a1a;
+    }
+
+    .pill-active-rcbs {
+        border-color: #7F77DD;
+    }
+
+    .pill-active-rws {
+        border-color: #1D9E75;
+    }
+
+    .pill-active-sm {
+        border-color: #D85A30;
+    }
+
+    .pill-active-mts {
+        border-color: #EF9F27;
+    }
+
+    .pill-active-eplc {
+        border-color: #378ADD;
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .time-pill {
+        display: inline-flex;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 3px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        border: 1.5px solid #ccc;
+        background: #fff;
+        color: #555;
+        transition: all 0.15s;
+        user-select: none;
+    }
+
+    .time-pill.active {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #1a1a1a;
+    }
+
+    .clear-filter {
+        font-size: 12px;
+        color: #888;
+        cursor: pointer;
+        padding: 3px 8px;
+    }
+
+    .project-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+        transition: opacity 0.2s;
+    }
+
+    .project-row:last-of-type {
+        border-bottom: none;
+    }
+
+    .project-name {
+        flex: 1;
+        font-size: 14px;
+    }
+
+    .star {
+        font-size: 16px;
+        cursor: pointer;
+        user-select: none;
+        line-height: 1;
+    }
+
+    .star-on {
+        color: #EF9F27;
+    }
+
+    .star-off {
+        color: #ccc;
+    }
+
+    .progress-wrap {
+        padding: 2px 0 8px 26px;
+    }
+
+    .progress-bar {
+        height: 4px;
+        background: #f0efe9;
+        border-radius: 2px;
+    }
+
+    .progress-fill {
+        height: 4px;
+        border-radius: 2px;
+    }
+
+    .task-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+        transition: opacity 0.2s;
+    }
+
+    .task-row:last-child {
+        border-bottom: none;
+    }
+
+    .task-check {
+        width: 16px;
+        height: 16px;
+        border: 0.5px solid #bbb;
+        border-radius: 4px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .task-name {
+        font-size: 14px;
+        margin: 0 0 4px;
+    }
+
+    .task-meta {
+        font-size: 12px;
+        color: #888;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .note-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .note-row:last-child {
+        border-bottom: none;
+    }
+
+    .note-title {
+        flex: 2;
+        font-size: 14px;
+    }
+
+    .note-select {
+        flex: 1;
+    }
+
+    .note-age {
+        font-size: 12px;
+        color: #888;
+        min-width: 70px;
+        text-align: right;
+    }
+
+    select {
+        font-size: 12px;
+        padding: 3px 6px;
+        border-radius: 8px;
+        border: 0.5px solid #ccc;
+        background: #f5f4f0;
+        color: #555;
+        width: 100%;
+    }
+
+    .dist-bar-wrap {
+        display: flex;
+        gap: 3px;
+        height: 10px;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+
+    .dist-seg {
+        height: 100%;
+    }
+
+    .dist-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .dist-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        color: #666;
+    }
+
+    .dist-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .habit-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 0;
+    }
+
+    .habit-name {
+        flex: 1;
+        font-size: 13px;
+    }
+
+    .habit-score {
+        display: flex;
+        gap: 4px;
+    }
+
+    .habit-dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+    }
+
+    .dot-done {
+        background: #1D9E75;
+    }
+
+    .dot-miss {
+        background: #f0efe9;
+        border: 0.5px solid #ccc;
+    }
+
+    .cal-week {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+        margin-bottom: 8px;
+    }
+
+    .cal-day {
+        background: #f5f4f0;
+        border-radius: 8px;
+        padding: 6px 4px;
         min-height: 64px;
     }
 

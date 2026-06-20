@@ -389,7 +389,7 @@
     .dot-miss {
         background: #f0efe9;
         border: 0.5px solid #ccc;
-    }/* Calendar */
+    }
 
     .cal-week {
         display: grid;
@@ -1015,11 +1015,7 @@
     // ═══════════════════════════════════════════════════════════
     // CONFIG — REPLACE ALL PLACEHOLDERS BEFORE UPLOADING
     // ═══════════════════════════════════════════════════════════
-
-    // 1. Google OAuth Client ID (from Google Cloud Console)
     const GCAL_CLIENT_ID = '435629248291-1upcl99q2u3grdaaa3pfice92bfnkamm.apps.googleusercontent.com';
-
-    // 2. Google Calendar IDs
     const GCAL_CALENDARS = [
     {
         id: 'renitacbsmith@gmail.com',
@@ -1032,17 +1028,11 @@
         cssClass: 'ev-mts'
     },
     ];
-
-    // 3. Notion Database IDs (found in each database's URL)
     const DB_PROJECTS = '33110b0375a88054b94bfda7c3e93ddb';
     const DB_TASKS = '33110b0375a880c18918ebac71592a35';
     const DB_NOTES = '6340f2b86ac94447a8315f0ba87545e3';
-
-    // 4. Cloudflare Worker URL (do not change unless you rename your worker)
+    const DB_DOMAINS = '33110b0375a88024b4f2c8e6beaca80e';
     const PROXY = 'https://notion-proxy.renitacbsmith.workers.dev/v1';
-
-    // ═══════════════════════════════════════════════════════════
-    // END CONFIG
     // ═══════════════════════════════════════════════════════════
 
     const DOMAIN_STYLE = {
@@ -1067,6 +1057,9 @@
             color: '#378ADD'
         },
     };
+
+    // Domain ID → name lookup (populated at init)
+    let domainMap = {};
 
     // ─── DATES ────────────────────────────────────────────────
     function formatDate(d) {
@@ -1104,7 +1097,6 @@
 
     // ─── GOOGLE CALENDAR ──────────────────────────────────────
     let gcalToken = null;
-
     function handleGCalAuth() {
         if (gcalToken) {
             loadCalendarEvents();
@@ -1123,7 +1115,6 @@
         });
         client.requestAccessToken();
     }
-
     async function loadCalendarEvents() {
         document.getElementById('cal-status').textContent = 'Loading calendar events…';
         const timeMin = DATES.w1s.toISOString();
@@ -1151,47 +1142,37 @@
         renderCalendar(allEvents);
         document.getElementById('cal-status').style.display = 'none';
     }
-
     function renderCalendar(events) {
-        const weeks = [
-        {
-            containerId: 'cal-week1',
-            startDate: DATES.w1s
-        },
-        {
-            containerId: 'cal-week2',
-            startDate: DATES.w2s
-        },
-        ];
-        weeks.forEach(({containerId, startDate}) => {
-            const days = document.getElementById(containerId).querySelectorAll('.cal-day');
-            days.forEach((dayEl, i) => {
-                const d = new Date(startDate);
-                d.setDate(startDate.getDate() + i);
-                const label = d.toLocaleDateString('en-US', {
+        [{
+            id: 'cal-week1',
+            start: DATES.w1s
+        }, {
+            id: 'cal-week2',
+            start: DATES.w2s
+        }].forEach(({id, start}) => {
+            document.getElementById(id).querySelectorAll('.cal-day').forEach((dayEl, i) => {
+                const d = new Date(start);
+                d.setDate(start.getDate() + i);
+                dayEl.querySelector('.cal-day-label').textContent = d.toLocaleDateString('en-US', {
                     weekday: 'short'
                 }).slice(0, 3) + ' ' + d.getDate();
-                dayEl.querySelector('.cal-day-label').textContent = label;
                 const eventsEl = dayEl.querySelector('.cal-events');
                 eventsEl.innerHTML = '';
                 const dayEvents = events.filter(e => {
-                    const start = e.start?.dateTime||e.start?.date;
-                    if (!start)
-                        return false;
-                    return new Date(start).toDateString() === d.toDateString();
+                    const s = e.start?.dateTime||e.start?.date;
+                    return s && new Date(s).toDateString() === d.toDateString();
                 });
-                const maxShow = 3;
-                dayEvents.slice(0, maxShow).forEach(e => {
+                dayEvents.slice(0, 3).forEach(e => {
                     const span = document.createElement('span');
                     span.className = 'cal-event ' + e.calClass;
                     span.textContent = e.summary || 'Event';
                     span.title = (e.summary || 'Event') + ' · ' + e.calLabel;
                     eventsEl.appendChild(span);
                 });
-                if (dayEvents.length > maxShow) {
+                if (dayEvents.length > 3) {
                     const more = document.createElement('span');
                     more.className = 'cal-more';
-                    more.textContent = '+' + (dayEvents.length - maxShow) + ' more';
+                    more.textContent = '+' + (dayEvents.length - 3) + ' more';
                     eventsEl.appendChild(more);
                 }
             });
@@ -1214,7 +1195,6 @@
             throw new Error('Notion API error ' + res.status);
         return (await res.json()).results || [];
     }
-
     async function notionCreate(dbId, properties) {
         const res = await fetch(`${PROXY}/pages`, {
             method: 'POST',
@@ -1233,7 +1213,6 @@
             throw new Error('Notion create error ' + res.status);
         return res.json();
     }
-
     async function notionPatch(pageId, properties) {
         const res = await fetch(`${PROXY}/pages/${pageId}`, {
             method: 'PATCH',
@@ -1249,6 +1228,18 @@
             throw new Error('Notion patch error ' + res.status);
         return res.json();
     }
+    async function notionGetPage(pageId) {
+        const res = await fetch(`${PROXY}/pages/${pageId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            },
+        });
+        if (!res.ok)
+            throw new Error('Notion get error ' + res.status);
+        return res.json();
+    }
 
     // ─── HELPERS ──────────────────────────────────────────────
     function getTitle(page) {
@@ -1259,22 +1250,36 @@
         }
         return 'Untitled';
     }
-    function getDomain(page) {
-        const props = page.properties;
-        for (const key of ['Pillar', 'Domain', 'Pillars']) {
-            if (!props[key])
-                continue;
-            if (props[key].type === 'select' && props[key].select)
-                return props[key].select.name;
-            if (props[key].type === 'rollup'&&props[key].rollup?.array?.length) {
-                for (const item of props[key].rollup.array) {
-                    if (item.type === 'title'&&item.title?.length)
-                        return item.title[0].plain_text;
-                }
-            }
+
+    // Get domain from Projects (relation field called "Domain")
+    function getProjectDomain(page) {
+        const rel=page.properties?.Domain;
+        if (rel?.type === 'relation'&&rel.relation?.length) {
+            const id = rel.relation[0].id;
+            return domainMap[id] || null;
         }
         return null;
     }
+
+    // Get domain from Tasks (rollup field called "Domain")
+    function getTaskDomain(page) {
+        const props = page.properties;
+        // Try rollup first
+        const rollup=props?.Domain;
+        if (rollup?.type === 'rollup'&&rollup.rollup?.array?.length) {
+            for (const item of rollup.rollup.array) {
+                if (item.type === 'title'&&item.title?.length)
+                    return item.title[0].plain_text;
+                if (item.type === 'rich_text'&&item.rich_text?.length)
+                    return item.rich_text[0].plain_text;
+            }
+        }
+        // Fallback: try select
+        if (rollup?.type === 'select' && rollup.select)
+            return rollup.select.name;
+        return null;
+    }
+
     function getProgress(page) {
         const p=page.properties?.Progress;
         if (!p)
@@ -1319,7 +1324,6 @@
     // ─── FILTERS ──────────────────────────────────────────────
     let activeDomain = null,
         activeProject = null;
-
     function applyFilters() {
         document.querySelectorAll('.project-row[data-domain]').forEach(row => {
             const show = (!activeDomain || row.dataset.domain === activeDomain) &&
@@ -1379,20 +1383,22 @@
         }
         const domainCount = {};
         pages.forEach(p => {
-            const d = getDomain(p);
+            const d = getProjectDomain(p);
             if (d)
                 domainCount[d] = (domainCount[d] || 0) + 1;
         });
         const total = pages.length;
         document.getElementById('dist-bar').innerHTML = Object.entries(domainCount).map(([d, c]) =>
-        `<div class="dist-seg" style="width:${Math.round(c / total * 100)}%;background:${domainColor(d)};"></div>`).join('');
+        `<div class="dist-seg" style="width:${Math.round(c / total * 100)}%;background:${domainColor(d)};"></div>`).join('') ||
+        '<div class="dist-seg" style="width:100%;background:#eee;"></div>';
         document.getElementById('dist-legend').innerHTML = Object.entries(domainCount).map(([d, c]) =>
-        `<div class="dist-item"><div class="dist-dot" style="background:${domainColor(d)};"></div>${d} ${Math.round(c / total * 100)}%</div>`).join('');
+        `<div class="dist-item"><div class="dist-dot" style="background:${domainColor(d)};"></div>${d} ${Math.round(c / total * 100)}%</div>`).join('') ||
+        '<span class="loading">No domain data found</span>';
         bar.innerHTML = pages.map(p =>
         `<span class="pill-project" data-project="${p.id}" onclick="toggleProject('${p.id}')">${getTitle(p)}</span>`
         ).join('') + `<span class="clear-filter" onclick="clearFilters()">Clear</span>`;
         list.innerHTML = pages.map(p => {
-            const domain = getDomain(p) || '?';
+            const domain = getProjectDomain(p) || '?';
             const prog = getProgress(p);
             return `
       <div class="project-row" data-domain="${domain}" data-project="${p.id}">
@@ -1430,7 +1436,7 @@
         document.getElementById('metric-overdue').textContent = overdue.length;
         list.innerHTML = !upcoming.length ? '<p class="empty">No tasks due in the next two weeks</p>' :
         upcoming.map(p => {
-            const domain = getDomain(p) || '?';
+            const domain = getTaskDomain(p) || '?';
             const due = getDueDate(p);
             const dateStr = due ? due.toLocaleDateString('en-US', {
                 weekday: 'short',
@@ -1455,7 +1461,7 @@
         }).join('');
         overdEl.innerHTML = !overdue.length ? '<p class="empty">Nothing carried over — nice work.</p>' :
         overdue.map(p => {
-            const domain = getDomain(p) || '?';
+            const domain = getTaskDomain(p) || '?';
             return `
         <div class="carried-row">
           <div class="overdue-check"></div>
@@ -1531,8 +1537,7 @@
     function updateHabitAvg() {
         const all = document.querySelectorAll('.habit-dot');
         const done = document.querySelectorAll('.habit-dot.dot-done');
-        const pct = all.length ? Math.round(done.length / all.length * 100) : 0;
-        document.getElementById('metric-habits').textContent = pct + '%';
+        document.getElementById('metric-habits').textContent = all.length ? Math.round(done.length / all.length * 100) + '%' : '—';
     }
 
     // ─── ASSIGN DOMAIN ────────────────────────────────────────
@@ -1577,11 +1582,6 @@
                         }
                     }]
                 },
-                Pillar: {
-                    select: {
-                        name: 'RCBS'
-                    }
-                },
             });
             alert('Reflection saved to Notion!');
         } catch (e) {
@@ -1608,11 +1608,6 @@
                             content: 'Plan Ahead — ' + formatDate(DATES.w1s) + ' to ' + formatDate(DATES.w2e)
                         }
                     }]
-                },
-                Pillar: {
-                    select: {
-                        name: 'RCBS'
-                    }
                 },
             });
             alert('Plan saved to Notion!');
@@ -1646,6 +1641,13 @@
     async function init() {
         buildHabitDots();
         try {
+            // First load the Domains database to build the ID→name map
+            const domains = await notionQuery(DB_DOMAINS, null);
+            domains.forEach(d => {
+                const name = getTitle(d);
+                domainMap[d.id] = name;
+            });
+
             const [projects, tasks, notes] = await Promise.all([
             notionQuery(DB_PROJECTS, null),
             notionQuery(DB_TASKS, null),

@@ -1253,7 +1253,7 @@
 
     // Get domain from Projects (relation field called "Domain")
     function getProjectDomain(page) {
-        const rel=page.properties?.Domain;
+       const rel = page.properties?.['🏛 Domain'] || page.properties?.Domain;
         if (rel?.type === 'relation'&&rel.relation?.length) {
             const id = rel.relation[0].id;
             return domainMap[id] || null;
@@ -1265,7 +1265,7 @@
     function getTaskDomain(page) {
         const props = page.properties;
         // Try rollup first
-        const rollup=props?.Domain;
+       const rollup = props?.['🏛 Domain'] || props?.Domain;
         if (rollup?.type === 'rollup'&&rollup.rollup?.array?.length) {
             for (const item of rollup.rollup.array) {
                 if (item.type === 'title'&&item.title?.length)

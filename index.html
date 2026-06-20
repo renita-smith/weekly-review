@@ -389,7 +389,7 @@
     .dot-miss {
         background: #f0efe9;
         border: 0.5px solid #ccc;
-    }
+    }/* Calendar */
 
     .cal-week {
         display: grid;
@@ -402,7 +402,10 @@
         background: #f5f4f0;
         border-radius: 8px;
         padding: 6px 4px;
-        min-height: 72px;
+        height: 100px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .cal-day-label {
@@ -411,17 +414,30 @@
         color: #888;
         text-align: center;
         margin-bottom: 4px;
+        flex-shrink: 0;
+    }
+
+    .cal-events {
+        flex: 1;
+        overflow: hidden;
     }
 
     .cal-event {
-        font-size: 10px;
+        font-size: 9px;
         padding: 2px 4px;
-        border-radius: 4px;
+        border-radius: 3px;
         margin-bottom: 2px;
         line-height: 1.3;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        display: block;
+    }
+
+    .cal-more {
+        font-size: 9px;
+        color: #888;
+        padding: 1px 4px;
     }
 
     .ev-personal {
@@ -710,15 +726,10 @@
         margin-bottom: 8px;
     }
 
-    .cal-signin {
-        text-align: center;
-        padding: 16px 0;
-    }
-
     .cal-source {
         font-size: 10px;
         color: #bbb;
-        margin-top: 2px;
+        margin-top: 8px;
         text-align: center;
     }
     </style>
@@ -784,60 +795,71 @@
         </div>
     </div>
 
-    <!-- Calendar -->
     <p class="section-title">Two-Week Outlook — Calendar</p>
     <div class="card" style="margin-bottom:1.5rem;">
         <p class="week-divider" id="week1Label">Week 1</p>
         <div class="cal-week" id="cal-week1">
             <div class="cal-day">
                 <p class="cal-day-label">Sun</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Mon</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Tue</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Wed</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Thu</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Fri</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Sat</p>
+                <div class="cal-events"></div>
             </div>
         </div>
         <p class="week-divider" id="week2Label">Week 2</p>
         <div class="cal-week" id="cal-week2">
             <div class="cal-day">
                 <p class="cal-day-label">Sun</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Mon</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Tue</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Wed</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Thu</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Fri</p>
+                <div class="cal-events"></div>
             </div>
             <div class="cal-day">
                 <p class="cal-day-label">Sat</p>
+                <div class="cal-events"></div>
             </div>
         </div>
-        <div id="cal-status" class="cal-signin">
-            <p style="font-size:13px;color:#888;">Click "Connect Calendar" above to load your Google Calendar events.</p>
-        </div>
+        <p id="cal-status" style="font-size:13px;color:#888;text-align:center;padding:8px 0;">Click "Connect Calendar" to load your Google Calendar events.</p>
         <p class="cal-source">Pulls from: Personal Google Calendar · MTS Google Calendar</p>
     </div>
 
@@ -988,13 +1010,16 @@
         <button class="btn btn-primary btn-full" style="margin-top:4px;" onclick="savePlan()">Save Plan to Notion →</button>
     </div>
 
-    <!-- Google API -->
-    <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
-
     <script>
-    // ─── CONFIG — FILL IN YOUR VALUES ─────────────────────────
+    // ═══════════════════════════════════════════════════════════
+    // CONFIG — REPLACE ALL PLACEHOLDERS BEFORE UPLOADING
+    // ═══════════════════════════════════════════════════════════
+
+    // 1. Google OAuth Client ID (from Google Cloud Console)
     const GCAL_CLIENT_ID = '435629248291-1upcl99q2u3grdaaa3pfice92bfnkamm.apps.googleusercontent.com';
+
+    // 2. Google Calendar IDs
     const GCAL_CALENDARS = [
     {
         id: 'renitacbsmith@gmail.com',
@@ -1008,11 +1033,17 @@
     },
     ];
 
-    // ─── NOTION CONFIG ────────────────────────────────────────
-    const DB_PROJECTS = '32110b0385a88054b94bfda7d3e93ddb';
-    const DB_TASKS = '32110b0375b880c18918ebac71592a36';
-    const DB_NOTES = '6340f2b86ac84447a8315f0ba87645e4';
+    // 3. Notion Database IDs (found in each database's URL)
+    const DB_PROJECTS = '33110b0375a88054b94bfda7c3e93ddb';
+    const DB_TASKS = '33110b0375a880c18918ebac71592a35';
+    const DB_NOTES = '6340f2b86ac94447a8315f0ba87545e3';
+
+    // 4. Cloudflare Worker URL (do not change unless you rename your worker)
     const PROXY = 'https://notion-proxy.renitacbsmith.workers.dev/v1';
+
+    // ═══════════════════════════════════════════════════════════
+    // END CONFIG
+    // ═══════════════════════════════════════════════════════════
 
     const DOMAIN_STYLE = {
         RCBS: {
@@ -1094,13 +1125,10 @@
     }
 
     async function loadCalendarEvents() {
-        document.getElementById('cal-status').innerHTML = '<p class="loading">Loading calendar events…</p>';
-
+        document.getElementById('cal-status').textContent = 'Loading calendar events…';
         const timeMin = DATES.w1s.toISOString();
         const timeMax = DATES.w2e.toISOString();
-
         const allEvents = [];
-
         for (const cal of GCAL_CALENDARS) {
             try {
                 const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(cal.id)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
@@ -1110,24 +1138,21 @@
                     }
                 });
                 const data = await res.json();
-                if (data.items) {
+                if (data.items)
                     data.items.forEach(e => allEvents.push({
                         ...e,
                         calLabel: cal.label,
                         calClass: cal.cssClass
                     }));
-                }
             } catch (e) {
-                console.error('Calendar fetch error:', e);
+                console.error('Calendar error:', e);
             }
         }
-
         renderCalendar(allEvents);
         document.getElementById('cal-status').style.display = 'none';
     }
 
     function renderCalendar(events) {
-        // Build day cells for both weeks
         const weeks = [
         {
             containerId: 'cal-week1',
@@ -1138,41 +1163,37 @@
             startDate: DATES.w2s
         },
         ];
-
         weeks.forEach(({containerId, startDate}) => {
-            const container = document.getElementById(containerId);
-            const days = container.querySelectorAll('.cal-day');
+            const days = document.getElementById(containerId).querySelectorAll('.cal-day');
             days.forEach((dayEl, i) => {
                 const d = new Date(startDate);
                 d.setDate(startDate.getDate() + i);
-                const dateStr = d.toLocaleDateString('en-US', {
-                    month: 'numeric',
-                    day: 'numeric'
-                });
-                const dayLabel = d.toLocaleDateString('en-US', {
+                const label = d.toLocaleDateString('en-US', {
                     weekday: 'short'
                 }).slice(0, 3) + ' ' + d.getDate();
-                dayEl.innerHTML = `<p class="cal-day-label">${dayLabel}</p>`;
-
-                // Find events for this day
+                dayEl.querySelector('.cal-day-label').textContent = label;
+                const eventsEl = dayEl.querySelector('.cal-events');
+                eventsEl.innerHTML = '';
                 const dayEvents = events.filter(e => {
                     const start = e.start?.dateTime||e.start?.date;
                     if (!start)
                         return false;
-                    const eDate = new Date(start);
-                    return eDate.toDateString() === d.toDateString();
+                    return new Date(start).toDateString() === d.toDateString();
                 });
-
-                dayEvents.forEach(e => {
-                    const title = e.summary || 'Event';
-                    const time = e.start?.dateTime
-                    ? new Date(e.start.dateTime).toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit'
-                    })
-                    : 'All day';
-                    dayEl.innerHTML += `<div class="cal-event ${e.calClass}" title="${title} · ${e.calLabel}">${title}</div>`;
+                const maxShow = 3;
+                dayEvents.slice(0, maxShow).forEach(e => {
+                    const span = document.createElement('span');
+                    span.className = 'cal-event ' + e.calClass;
+                    span.textContent = e.summary || 'Event';
+                    span.title = (e.summary || 'Event') + ' · ' + e.calLabel;
+                    eventsEl.appendChild(span);
                 });
+                if (dayEvents.length > maxShow) {
+                    const more = document.createElement('span');
+                    more.className = 'cal-more';
+                    more.textContent = '+' + (dayEvents.length - maxShow) + ' more';
+                    eventsEl.appendChild(more);
+                }
             });
         });
     }
@@ -1238,7 +1259,6 @@
         }
         return 'Untitled';
     }
-
     function getDomain(page) {
         const props = page.properties;
         for (const key of ['Pillar', 'Domain', 'Pillars']) {
@@ -1255,7 +1275,6 @@
         }
         return null;
     }
-
     function getProgress(page) {
         const p=page.properties?.Progress;
         if (!p)
@@ -1266,7 +1285,6 @@
             return Math.round((p.number || 0) * 100);
         return 0;
     }
-
     function getDueDate(page) {
         for (const key of ['Due Date', 'Due date', 'DueDate', 'Target Deadline']) {
             const d=page.properties?.[key];
@@ -1275,20 +1293,17 @@
         }
         return null;
     }
-
     function getCreatedDate(page) {
         if (page.created_time)
             return new Date(page.created_time);
         return new Date();
     }
-
     function pillHtml(domain, small) {
         const style = DOMAIN_STYLE[domain];
         const cls = style ? style.pill : 'pill-unknown';
         const sz = small ? 'font-size:11px;padding:1px 7px;' : '';
         return `<span class="domain-pill ${cls}" style="cursor:default;${sz}">${domain || '?'}</span>`;
     }
-
     function daysAgo(date) {
         const diff = Math.floor((Date.now() - date.getTime()) / 86400000);
         if (diff === 0)
@@ -1297,12 +1312,11 @@
             return '1 day ago';
         return diff + ' days ago';
     }
-
     function domainColor(d) {
         return DOMAIN_STYLE[d]?.color || '#ccc';
     }
 
-    // ─── FILTER STATE ─────────────────────────────────────────
+    // ─── FILTERS ──────────────────────────────────────────────
     let activeDomain = null,
         activeProject = null;
 
@@ -1321,7 +1335,6 @@
             row.classList.toggle('hidden', !show);
         });
     }
-
     function toggleDomain(domain) {
         activeDomain = activeDomain === domain ? null : domain;
         document.querySelectorAll('#filterBar .domain-pill').forEach(p => {
@@ -1331,13 +1344,11 @@
         });
         applyFilters();
     }
-
     function toggleProject(id) {
         activeProject = activeProject === id ? null : id;
         document.querySelectorAll('#projectBar .pill-project').forEach(p => p.classList.toggle('active', p.dataset.project === activeProject));
         applyFilters();
     }
-
     function clearFilters() {
         activeDomain = null;
         activeProject = null;
@@ -1346,14 +1357,12 @@
         document.querySelectorAll('#projectBar .pill-project').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.project-row[data-domain],.task-row[data-domain],.progress-wrap').forEach(r => r.classList.remove('hidden'));
     }
-
     function toggleStar(el) {
         const on = el.classList.contains('star-on');
         el.classList.toggle('star-on', !on);
         el.classList.toggle('star-off', on);
         el.textContent = on ? '☆' : '★';
     }
-
     function toggleTime(el) {
         document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('active'));
         el.classList.add('active');
@@ -1368,7 +1377,6 @@
             bar.innerHTML = '';
             return;
         }
-
         const domainCount = {};
         pages.forEach(p => {
             const d = getDomain(p);
@@ -1376,16 +1384,13 @@
                 domainCount[d] = (domainCount[d] || 0) + 1;
         });
         const total = pages.length;
-
         document.getElementById('dist-bar').innerHTML = Object.entries(domainCount).map(([d, c]) =>
         `<div class="dist-seg" style="width:${Math.round(c / total * 100)}%;background:${domainColor(d)};"></div>`).join('');
         document.getElementById('dist-legend').innerHTML = Object.entries(domainCount).map(([d, c]) =>
         `<div class="dist-item"><div class="dist-dot" style="background:${domainColor(d)};"></div>${d} ${Math.round(c / total * 100)}%</div>`).join('');
-
         bar.innerHTML = pages.map(p =>
         `<span class="pill-project" data-project="${p.id}" onclick="toggleProject('${p.id}')">${getTitle(p)}</span>`
         ).join('') + `<span class="clear-filter" onclick="clearFilters()">Clear</span>`;
-
         list.innerHTML = pages.map(p => {
             const domain = getDomain(p) || '?';
             const prog = getProgress(p);
@@ -1403,7 +1408,6 @@
       </div>`
             ;
         }).join('');
-
         document.getElementById('metric-projects').textContent = pages.length;
     }
 
@@ -1414,7 +1418,6 @@
         const now = new Date();
         const twoWks = new Date();
         twoWks.setDate(now.getDate() + 14);
-
         const upcoming = pages.filter(p => {
             const d = getDueDate(p);
             return d && d >= now && d <= twoWks;
@@ -1423,10 +1426,8 @@
             const d = getDueDate(p);
             return d && d < now;
         });
-
         document.getElementById('metric-tasks').textContent = upcoming.length;
         document.getElementById('metric-overdue').textContent = overdue.length;
-
         list.innerHTML = !upcoming.length ? '<p class="empty">No tasks due in the next two weeks</p>' :
         upcoming.map(p => {
             const domain = getDomain(p) || '?';
@@ -1452,7 +1453,6 @@
 
             ;
         }).join('');
-
         overdEl.innerHTML = !overdue.length ? '<p class="empty">Nothing carried over — nice work.</p>' :
         overdue.map(p => {
             const domain = getDomain(p) || '?';
@@ -1480,12 +1480,10 @@
             list.innerHTML = '<p class="empty">Inbox zero — all notes are processed.</p>';
             return;
         }
-
         const now = Date.now();
         const oneWk = 7 * 86400000;
         const thisWk = pages.filter(p => now - getCreatedDate(p).getTime() <= oneWk);
         const older = pages.filter(p => now - getCreatedDate(p).getTime() > oneWk);
-
         function noteRow(p) {
             return `
       <div class="note-row" data-page-id="${p.id}">
@@ -1507,7 +1505,6 @@
       </div>`
             ;
         }
-
         list.innerHTML =
         (thisWk.length ? `<p style="font-size:12px;font-weight:500;color:#888;margin-bottom:8px;">This Week</p>${thisWk.map(noteRow).join('')}` : '') +
         (older.length ? `<p style="font-size:12px;font-weight:500;color:#888;margin:12px 0 8px;">Older</p>${older.map(noteRow).join('')}` : '');
@@ -1526,13 +1523,11 @@
             ).join('');
         }
     }
-
     function toggleHabit(el) {
         el.classList.toggle('dot-done');
         el.classList.toggle('dot-miss');
         updateHabitAvg();
     }
-
     function updateHabitAvg() {
         const all = document.querySelectorAll('.habit-dot');
         const done = document.querySelectorAll('.habit-dot.dot-done');

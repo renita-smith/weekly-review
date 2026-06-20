@@ -727,7 +727,8 @@
             <p class="subtitle" id="weekLabel">Loading dates…</p>
         </div>
         <div class="header-btns">
-            <button class="btn btn-gcal" id="gcal-btn" onclick="handleGCalAuth()">📅 Connect Calendar</button>
+            <button class="btn btn-gcal" id="gcal-btn-rcbs" onclick="handleGCalAuth('rcbs')">📅 Connect RCBS</button>
+            <button class="btn btn-gcal" id="gcal-btn-mts" onclick="handleGCalAuth('mts')" style="background:#EF9F27;border-color:#EF9F27;">📅 Connect MTS</button>
             <button class="btn btn-reset" onclick="hardReset()">↺ Reset</button>
         </div>
     </div>
@@ -845,7 +846,7 @@
             </div>
         </div>
         <p id="cal-status" style="font-size:13px;color:#888;text-align:center;padding:8px 0;">Click "Connect Calendar" to load your Google Calendar events.</p>
-        <p class="cal-source">Pulls from: Personal Google Calendar · MTS Google Calendar</p>
+        <p class="cal-source" id="cal-source">Connect RCBS and MTS calendars above to load events.</p>
     </div>
 
     <p class="section-title">Filter By Domain</p>
@@ -1005,12 +1006,14 @@
     {
         id: 'renitacbsmith@gmail.com',
         label: 'Personal',
-        cssClass: 'ev-personal'
+        cssClass: 'ev-personal',
+        account: 'rcbs'
     },
     {
         id: 'rs@michouthesolutionist.com',
         label: 'MTS',
-        cssClass: 'ev-mts'
+        cssClass: 'ev-mts',
+        account: 'mts'
     },
     ];
     const DB_PROJECTS = '33110b0375a88054b94bfda7c3e93ddb';
@@ -1081,51 +1084,78 @@
     document.getElementById('week2Label').textContent = 'Week 2 · ' + formatDate(DATES.w2s) + ' – ' + formatDate(DATES.w2e);
 
     // ─── GOOGLE CALENDAR ──────────────────────────────────────
-    let gcalToken = null;
-    function handleGCalAuth() {
-        if (gcalToken) {
-            loadCalendarEvents();
-            return;
-        }
+    // Each account gets its own token and calendar list
+    const GCAL_ACCOUNTS = {
+        rcbs: {
+            token: null,
+            calendars: GCAL_CALENDARS.filter(c => c.account === 'rcbs'),
+            btnId: 'gcal-btn-rcbs',
+            label: 'RCBS',
+        },
+        mts: {
+            token: null,
+            calendars: GCAL_CALENDARS.filter(c => c.account === 'mts'),
+            btnId: 'gcal-btn-mts',
+            label: 'MTS',
+        },
+    };
+
+    // Merged events from all connected accounts
+    let allCalendarEvents = [];
+
+    function handleGCalAuth(accountKey) {
+        const account = GCAL_ACCOUNTS[accountKey];
         const client = google.accounts.oauth2.initTokenClient({
             client_id: GCAL_CLIENT_ID,
             scope: 'https://www.googleapis.com/auth/calendar.readonly',
             callback: (response) => {
                 if (response.access_token) {
-                    gcalToken = response.access_token;
-                    document.getElementById('gcal-btn').textContent = '📅 Refresh Calendar';
-                    loadCalendarEvents();
+                    account.token = response.access_token;
+                    const btn = document.getElementById(account.btnId);
+                    btn.textContent = '✓ ' + account.label + ' Connected';
+                    btn.style.opacity = '0.7';
+                    loadAccountEvents(accountKey);
                 }
             },
         });
         client.requestAccessToken();
     }
-    async function loadCalendarEvents() {
-        document.getElementById('cal-status').textContent = 'Loading calendar events…';
+
+    async function loadAccountEvents(accountKey) {
+        const account = GCAL_ACCOUNTS[accountKey];
+        if (!account.token)
+            return;
+        document.getElementById('cal-status').textContent = 'Loading ' + account.label + ' calendar…';
+        document.getElementById('cal-status').style.display = 'block';
         const timeMin = DATES.w1s.toISOString();
         const timeMax = DATES.w2e.toISOString();
-        const allEvents = [];
-        for (const cal of GCAL_CALENDARS) {
+        // Remove existing events from this account then re-add
+        allCalendarEvents = allCalendarEvents.filter(e => e.calAccount !== accountKey);
+        for (const cal of account.calendars) {
             try {
                 const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(cal.id)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
                 const res = await fetch(url, {
                     headers: {
-                        'Authorization': 'Bearer ' + gcalToken
+                        'Authorization': 'Bearer ' + account.token
                     }
                 });
                 const data = await res.json();
                 if (data.items)
-                    data.items.forEach(e => allEvents.push({
+                    data.items.forEach(e => allCalendarEvents.push({
                         ...e,
                         calLabel: cal.label,
-                        calClass: cal.cssClass
+                        calClass: cal.cssClass,
+                        calAccount: accountKey
                     }));
             } catch (e) {
-                console.error('Calendar error:', e);
+                console.error('Calendar error for ' + accountKey + ':', e);
             }
         }
-        renderCalendar(allEvents);
+        renderCalendar(allCalendarEvents);
         document.getElementById('cal-status').style.display = 'none';
+        // Update source line
+        const connected = Object.values(GCAL_ACCOUNTS).filter(a => a.token).map(a => a.label).join(' · ');
+        document.getElementById('cal-source').textContent = connected ? 'Showing: ' + connected : 'Connect calendars above to load events.';
     }
     function renderCalendar(events) {
         [{
@@ -1550,13 +1580,31 @@
         try {
             // Find the domain page ID from domainMap by name
             const domainPageId = Object.keys(domainMap).find(k => domainMap[k] === domain);
-            await notionPatch(pageId, {
-                Pillar: {
-                    select: {
-                        name: domain
+            if (!domainPageId) {
+                alert('Could not find domain ID for ' + domain);
+                return;
+            }
+            // Notes use a relation field for Domain — find the field key by looping
+            const page = await notionQuery(DB_NOTES, null).then(pages => pages.find(p => p.id === pageId));
+            let domainFieldKey = null;
+            if (page) {
+                for (const key of Object.keys(page.properties)) {
+                    if (page.properties[key].type === 'relation' && key.toLowerCase().includes('domain')) {
+                        domainFieldKey = key;
+                        break;
                     }
                 }
-            });
+            }
+            const patchProps = domainFieldKey
+            ? {
+                [domainFieldKey]: {
+                    relation: [{
+                        id: domainPageId
+                    }]
+                }
+            }
+            : {};
+            await notionPatch(pageId, patchProps);
             const row = document.querySelector(`[data-page-id="${pageId}"]`);
             if (row) {
                 row.style.opacity = '0.4';
@@ -1655,7 +1703,22 @@
             const [projects, tasks, notes] = await Promise.all([
             notionQuery(DB_PROJECTS, null),
             notionQuery(DB_TASKS, null),
-            notionQuery(DB_NOTES, null),
+            notionQuery(DB_NOTES, {
+                or: [
+                {
+                    property: 'Status',
+                    status: {
+                        equals: 'Inbox'
+                    }
+                },
+                {
+                    property: 'Status',
+                    status: {
+                        equals: 'Active'
+                    }
+                },
+                ]
+            }),
             ]);
             const projectMap = {};
             projects.forEach(p => {

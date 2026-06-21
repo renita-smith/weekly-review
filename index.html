@@ -547,6 +547,18 @@
         background: #3367d6;
     }
 
+    .btn-gcal-mts {
+        background: #EF9F27;
+        color: #fff;
+        border-color: #EF9F27;
+        font-size: 12px;
+        padding: 6px 14px;
+    }
+
+    .btn-gcal-mts:hover {
+        background: #d4890f;
+    }
+
     .carried-row {
         display: flex;
         align-items: flex-start;
@@ -728,7 +740,7 @@
         </div>
         <div class="header-btns">
             <button class="btn btn-gcal" id="gcal-btn-rcbs" onclick="handleGCalAuth('rcbs')">📅 Connect RCBS</button>
-            <button class="btn btn-gcal" id="gcal-btn-mts" onclick="handleGCalAuth('mts')" style="background:#EF9F27;border-color:#EF9F27;">📅 Connect MTS</button>
+            <button class="btn btn-gcal-mts" id="gcal-btn-mts" onclick="handleGCalAuth('mts')">📅 Connect MTS</button>
             <button class="btn btn-reset" onclick="hardReset()">↺ Reset</button>
         </div>
     </div>
@@ -845,8 +857,8 @@
                 <div class="cal-events"></div>
             </div>
         </div>
-        <p id="cal-status" style="font-size:13px;color:#888;text-align:center;padding:8px 0;">Click "Connect Calendar" to load your Google Calendar events.</p>
-        <p class="cal-source" id="cal-source">Connect RCBS and MTS calendars above to load events.</p>
+        <p id="cal-status" style="font-size:13px;color:#888;text-align:center;padding:8px 0;">Connect RCBS and MTS calendars above to load events.</p>
+        <p class="cal-source" id="cal-source">Pulls from: RCBS · MTS</p>
     </div>
 
     <p class="section-title">Filter By Domain</p>
@@ -1002,20 +1014,8 @@
     // CONFIG — FILL IN YOUR VALUES
     // ═══════════════════════════════════════════════════════════
     const GCAL_CLIENT_ID = '435629248291-1upcl99q2u3grdaaa3pfice92bfnkamm.apps.googleusercontent.com';
-    const GCAL_CALENDARS = [
-    {
-        id: 'renitacbsmith@gmail.com',
-        label: 'Personal',
-        cssClass: 'ev-personal',
-        account: 'rcbs'
-    },
-    {
-        id: 'rs@michouthesolutionist.com',
-        label: 'MTS',
-        cssClass: 'ev-mts',
-        account: 'mts'
-    },
-    ];
+    const GCAL_RCBS_ID = 'renitacbsmith@gmail.com'; // Personal/RCBS calendar ID
+    const GCAL_MTS_ID = 'rs@michouthesolutionist.com'; // MTS calendar ID
     const DB_PROJECTS = '33110b0375a88054b94bfda7c3e93ddb';
     const DB_TASKS = '33110b0375a880c18918ebac71592a35';
     const DB_NOTES = '6340f2b86ac94447a8315f0ba87545e3';
@@ -1046,7 +1046,6 @@
         },
     };
 
-    // Domain page ID → domain name (e.g. "RCBS")
     let domainMap = {};
 
     // ─── DATES ────────────────────────────────────────────────
@@ -1083,80 +1082,92 @@
     document.getElementById('week1Label').textContent = 'Week 1 · ' + formatDate(DATES.w1s) + ' – ' + formatDate(DATES.w1e);
     document.getElementById('week2Label').textContent = 'Week 2 · ' + formatDate(DATES.w2s) + ' – ' + formatDate(DATES.w2e);
 
-    // ─── GOOGLE CALENDAR ──────────────────────────────────────
-    // Each account gets its own token and calendar list
-    const GCAL_ACCOUNTS = {
-        rcbs: {
-            token: null,
-            calendars: GCAL_CALENDARS.filter(c => c.account === 'rcbs'),
-            btnId: 'gcal-btn-rcbs',
-            label: 'RCBS',
-        },
-        mts: {
-            token: null,
-            calendars: GCAL_CALENDARS.filter(c => c.account === 'mts'),
-            btnId: 'gcal-btn-mts',
-            label: 'MTS',
-        },
-    };
+    // ─── GOOGLE CALENDAR — TWO ACCOUNTS ──────────────────────
+    let rcbsToken = null;
+    let mtsToken = null;
+    let allCalEvents = [];
 
-    // Merged events from all connected accounts
-    let allCalendarEvents = [];
-
-    function handleGCalAuth(accountKey) {
-        const account = GCAL_ACCOUNTS[accountKey];
+    function handleGCalAuth(account) {
         const client = google.accounts.oauth2.initTokenClient({
             client_id: GCAL_CLIENT_ID,
             scope: 'https://www.googleapis.com/auth/calendar.readonly',
             callback: (response) => {
                 if (response.access_token) {
-                    account.token = response.access_token;
-                    const btn = document.getElementById(account.btnId);
-                    btn.textContent = '✓ ' + account.label + ' Connected';
-                    btn.style.opacity = '0.7';
-                    loadAccountEvents(accountKey);
+                    if (account === 'rcbs') {
+                        rcbsToken = response.access_token;
+                        const btn = document.getElementById('gcal-btn-rcbs');
+                        btn.textContent = '✓ RCBS Connected';
+                        btn.style.opacity = '0.75';
+                    } else {
+                        mtsToken = response.access_token;
+                        const btn = document.getElementById('gcal-btn-mts');
+                        btn.textContent = '✓ MTS Connected';
+                        btn.style.opacity = '0.75';
+                    }
+                    loadAllCalendarEvents();
                 }
             },
         });
         client.requestAccessToken();
     }
 
-    async function loadAccountEvents(accountKey) {
-        const account = GCAL_ACCOUNTS[accountKey];
-        if (!account.token)
-            return;
-        document.getElementById('cal-status').textContent = 'Loading ' + account.label + ' calendar…';
-        document.getElementById('cal-status').style.display = 'block';
+    async function loadAllCalendarEvents() {
+        const statusEl = document.getElementById('cal-status');
+        statusEl.style.display = 'block';
+        statusEl.textContent = 'Loading calendar events…';
+        allCalEvents = [];
         const timeMin = DATES.w1s.toISOString();
         const timeMax = DATES.w2e.toISOString();
-        // Remove existing events from this account then re-add
-        allCalendarEvents = allCalendarEvents.filter(e => e.calAccount !== accountKey);
-        for (const cal of account.calendars) {
+
+        // Load RCBS calendar
+        if (rcbsToken) {
             try {
-                const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(cal.id)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
+                const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GCAL_RCBS_ID)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
                 const res = await fetch(url, {
                     headers: {
-                        'Authorization': 'Bearer ' + account.token
+                        'Authorization': 'Bearer ' + rcbsToken
                     }
                 });
                 const data = await res.json();
                 if (data.items)
-                    data.items.forEach(e => allCalendarEvents.push({
+                    data.items.forEach(e => allCalEvents.push({
                         ...e,
-                        calLabel: cal.label,
-                        calClass: cal.cssClass,
-                        calAccount: accountKey
+                        calLabel: 'Personal',
+                        calClass: 'ev-personal'
                     }));
             } catch (e) {
-                console.error('Calendar error for ' + accountKey + ':', e);
+                console.error('RCBS calendar error:', e);
             }
         }
-        renderCalendar(allCalendarEvents);
-        document.getElementById('cal-status').style.display = 'none';
-        // Update source line
-        const connected = Object.values(GCAL_ACCOUNTS).filter(a => a.token).map(a => a.label).join(' · ');
-        document.getElementById('cal-source').textContent = connected ? 'Showing: ' + connected : 'Connect calendars above to load events.';
+
+        // Load MTS calendar
+        if (mtsToken) {
+            try {
+                const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GCAL_MTS_ID)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
+                const res = await fetch(url, {
+                    headers: {
+                        'Authorization': 'Bearer ' + mtsToken
+                    }
+                });
+                const data = await res.json();
+                if (data.items)
+                    data.items.forEach(e => allCalEvents.push({
+                        ...e,
+                        calLabel: 'MTS',
+                        calClass: 'ev-mts'
+                    }));
+            } catch (e) {
+                console.error('MTS calendar error:', e);
+            }
+        }
+
+        renderCalendar(allCalEvents);
+        statusEl.style.display = 'none';
+
+        const connected = [rcbsToken ? 'RCBS' : null, mtsToken ? 'MTS' : null].filter(Boolean).join(' · ');
+        document.getElementById('cal-source').textContent = connected ? 'Showing: ' + connected : 'Connect calendars above.';
     }
+
     function renderCalendar(events) {
         [{
             id: 'cal-week1',
@@ -1245,42 +1256,31 @@
     }
 
     // ─── HELPERS — emoji-proof field reading ──────────────────
-
-    // Get title from any page regardless of field name
     function getTitle(page) {
         for (const key of Object.keys(page.properties)) {
             const p = page.properties[key];
-            if (p.type === 'title'&&p.title?.length) {
+            if (p.type === 'title'&&p.title?.length)
                 return p.title.map(r => r.plain_text).join('');
-            }
         }
         return 'Untitled';
     }
 
-    // Get domain name from a Project page
-    // Projects use a Relation field pointing to the Domains database
-    // We loop all properties to find the relation field, then look up the name in domainMap
     function getProjectDomain(page) {
         for (const key of Object.keys(page.properties)) {
             const p = page.properties[key];
             if (p.type === 'relation' && key.toLowerCase().includes('domain')&&p.relation?.length) {
-                const relId = p.relation[0].id;
-                return domainMap[relId] || null;
+                return domainMap[p.relation[0].id] || null;
             }
         }
         return null;
     }
 
-    // Get domain name from a Task page
-    // Tasks use a Rollup field that rolls up the domain name from the linked Project
-    // We loop all properties to find a rollup that contains the domain name
     function getTaskDomain(page) {
         for (const key of Object.keys(page.properties)) {
             const p = page.properties[key];
             if (p.type === 'rollup' && key.toLowerCase().includes('domain')) {
                 if(p.rollup?.array?.length) {
                     for (const item of p.rollup.array) {
-                        // The rollup may return title or rich_text items
                         if (item.type === 'title'&&item.title?.length)
                             return item.title[0].plain_text;
                         if (item.type === 'rich_text'&&item.rich_text?.length)
@@ -1292,7 +1292,6 @@
         return null;
     }
 
-    // Get progress from Projects
     function getProgress(page) {
         for (const key of Object.keys(page.properties)) {
             const p = page.properties[key];
@@ -1306,7 +1305,6 @@
         return 0;
     }
 
-    // Get due date from Tasks — try multiple possible field names
     function getDueDate(page) {
         for (const key of Object.keys(page.properties)) {
             if (key.toLowerCase().includes('due')) {
@@ -1318,7 +1316,6 @@
         return null;
     }
 
-    // Get the linked project ID from a Task
     function getTaskProjectId(page) {
         for (const key of Object.keys(page.properties)) {
             const p = page.properties[key];
@@ -1549,62 +1546,37 @@
         (older.length ? `<p style="font-size:12px;font-weight:500;color:#888;margin:12px 0 8px;">Older</p>${older.map(noteRow).join('')}` : '');
     }
 
-    // ─── HABITS ───────────────────────────────────────────────
-    function buildHabitDots() {
-        for (let i = 0; i < 9; i++) {
-            const el = document.getElementById('h' + i);
-            if (!el)
-                continue;
-            el.innerHTML = Array.from({
-                length: 7
-            }, (_, d) =>
-            `<div class="habit-dot dot-miss" onclick="toggleHabit(this)" style="cursor:pointer;" title="Day ${d + 1}"></div>`
-            ).join('');
-        }
-    }
-    function toggleHabit(el) {
-        el.classList.toggle('dot-done');
-        el.classList.toggle('dot-miss');
-        updateHabitAvg();
-    }
-    function updateHabitAvg() {
-        const all = document.querySelectorAll('.habit-dot');
-        const done = document.querySelectorAll('.habit-dot.dot-done');
-        document.getElementById('metric-habits').textContent = all.length ? Math.round(done.length / all.length * 100) + '%' : '—';
-    }
-
-    // ─── ASSIGN DOMAIN ────────────────────────────────────────
+    // ─── ASSIGN DOMAIN (Notes — uses relation field) ──────────
     async function assignDomain(pageId, domain) {
         if (!domain)
             return;
         try {
-            // Find the domain page ID from domainMap by name
             const domainPageId = Object.keys(domainMap).find(k => domainMap[k] === domain);
             if (!domainPageId) {
-                alert('Could not find domain ID for ' + domain);
+                alert('Could not find domain: ' + domain);
                 return;
             }
-            // Notes use a relation field for Domain — find the field key by looping
-            const page = await notionQuery(DB_NOTES, null).then(pages => pages.find(p => p.id === pageId));
-            let domainFieldKey = null;
+            // Find the domain relation field key by looping (emoji-proof)
+            const pages = await notionQuery(DB_NOTES, null);
+            const page = pages.find(p => p.id === pageId);
+            let fieldKey = null;
             if (page) {
                 for (const key of Object.keys(page.properties)) {
                     if (page.properties[key].type === 'relation' && key.toLowerCase().includes('domain')) {
-                        domainFieldKey = key;
+                        fieldKey = key;
                         break;
                     }
                 }
             }
-            const patchProps = domainFieldKey
-            ? {
-                [domainFieldKey]: {
-                    relation: [{
-                        id: domainPageId
-                    }]
-                }
+            if (fieldKey) {
+                await notionPatch(pageId, {
+                    [fieldKey]: {
+                        relation: [{
+                            id: domainPageId
+                        }]
+                    }
+                });
             }
-            : {};
-            await notionPatch(pageId, patchProps);
             const row = document.querySelector(`[data-page-id="${pageId}"]`);
             if (row) {
                 row.style.opacity = '0.4';
@@ -1690,11 +1662,34 @@
         });
     }
 
+    // ─── HABITS ───────────────────────────────────────────────
+    function buildHabitDots() {
+        for (let i = 0; i < 9; i++) {
+            const el = document.getElementById('h' + i);
+            if (!el)
+                continue;
+            el.innerHTML = Array.from({
+                length: 7
+            }, (_, d) =>
+            `<div class="habit-dot dot-miss" onclick="toggleHabit(this)" style="cursor:pointer;" title="Day ${d + 1}"></div>`
+            ).join('');
+        }
+    }
+    function toggleHabit(el) {
+        el.classList.toggle('dot-done');
+        el.classList.toggle('dot-miss');
+        updateHabitAvg();
+    }
+    function updateHabitAvg() {
+        const all = document.querySelectorAll('.habit-dot');
+        const done = document.querySelectorAll('.habit-dot.dot-done');
+        document.getElementById('metric-habits').textContent = all.length ? Math.round(done.length / all.length * 100) + '%' : '—';
+    }
+
     // ─── INIT ─────────────────────────────────────────────────
     async function init() {
         buildHabitDots();
         try {
-            // Load Domains first to build the ID→name map
             const domains = await notionQuery(DB_DOMAINS, null);
             domains.forEach(d => {
                 domainMap[d.id] = getTitle(d);
@@ -1720,6 +1715,7 @@
                 ]
             }),
             ]);
+
             const projectMap = {};
             projects.forEach(p => {
                 projectMap[p.id] = getTitle(p);

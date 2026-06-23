@@ -337,12 +337,21 @@
     }
 
     .note-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 10px;
         padding: 9px 0;
         border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
     }
 
     .note-row:last-child {
         border-bottom: none;
+    }
+
+    .note-left {
+        flex: 1;
+        min-width: 0;
     }
 
     .note-main {
@@ -387,23 +396,18 @@
         flex-shrink: 0;
     }
 
-    .note-meta {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin: 6px 0 0 26px;
-        flex-wrap: wrap;
-    }
-
     .note-pills {
         display: flex;
         gap: 5px;
         flex-wrap: wrap;
-        flex: 1;
+        margin: 6px 0 0 26px;
     }
 
     .status-select {
         flex-shrink: 0;
+        width: auto;
+        min-width: 92px;
+        align-self: center;
     }
 
     .type-pill {
@@ -416,6 +420,7 @@
     }
 
     .note-preview {
+        flex-basis: 100%;
         margin: 7px 0 2px 26px;
         font-size: 13px;
         color: #555;
@@ -1136,7 +1141,7 @@
     // ═══════════════════════════════════════════════════════════
     // CONFIG — FILL IN YOUR VALUES
     // ═══════════════════════════════════════════════════════════
-    const GCAL_CLIENT_ID = '435629248291-1upcl99q2u3grdaaa3pfice92bfnkamm.apps.googleusercontent.com';
+    const GCAL_CLIENT_ID = '435629248291-1upcl99q2u3grdaaa3pfice92bfnkamm.apps.googleusercontent.com';   // ← paste your OAuth client ID (…apps.googleusercontent.com)
     const GCAL_RCBS_ID = 'renitacbsmith@gmail.com'; // Personal/RCBS calendar ID
     const GCAL_MTS_ID = 'rs@michouthesolutionist.com'; // MTS calendar ID
     const DB_PROJECTS = '33110b0375a88054b94bfda7c3e93ddb';   // ← paste your Projects database ID
@@ -1501,6 +1506,20 @@
         return null;
     }
 
+    // The note's own Date field, falling back to the record-created date when blank
+    function noteWhen(page) {
+        return getNoteDate(page) || getCreatedDate(page);
+    }
+
+    // Recent notes get a relative age; older ones show their actual date (with year if not this year)
+    function noteAgeLabel(page) {
+        const d = noteWhen(page);
+        const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+        if (diff >= 0 && diff <= 7) return daysAgo(d);
+        const sameYear = d.getFullYear() === new Date().getFullYear();
+        return sameYear ? formatDate(d) : formatDate(d) + ' ' + d.getFullYear();
+    }
+
     // Common type values get stable colors; anything else falls to neutral so new types still render.
     const TYPE_COLOR = {
         Reminder: '#D8772B', Idea: '#7F77DD', Thought: '#1D9E75', Convo: '#378ADD',
@@ -1698,8 +1717,8 @@
         }
         const now = Date.now();
         const oneWk = 7 * 86400000;
-        const thisWk = pages.filter(p => now - getCreatedDate(p).getTime() <= oneWk);
-        const older = pages.filter(p => now - getCreatedDate(p).getTime() > oneWk);
+        const thisWk = pages.filter(p => now - noteWhen(p).getTime() <= oneWk);
+        const older = pages.filter(p => now - noteWhen(p).getTime() > oneWk);
         function noteRow(p) {
             const status = (getStatus(p) || '').toUpperCase();
             const domain = getProjectDomain(p);
@@ -1710,17 +1729,17 @@
             const pills = (domain ? pillHtml(domain, true) : '') + types.map(typePillHtml).join('');
             return `
       <div class="note-row" data-page-id="${p.id}" data-status="${status}">
-        <div class="note-main">
-          <button class="note-caret" onclick="toggleNotePreview('${p.id}', this)" title="Preview note" aria-label="Preview note">▸</button>
-          <a class="note-title-link" href="${url}" target="_blank" rel="noopener">${escTag(getTitle(p))}</a>
-          <span class="note-age">${daysAgo(getCreatedDate(p))}</span>
+        <div class="note-left">
+          <div class="note-main">
+            <button class="note-caret" onclick="toggleNotePreview('${p.id}', this)" title="Preview note" aria-label="Preview note">▸</button>
+            <a class="note-title-link" href="${url}" target="_blank" rel="noopener">${escTag(getTitle(p))}</a>
+            <span class="note-age">${noteAgeLabel(p)}</span>
+          </div>
+          ${pills ? `<div class="note-pills">${pills}</div>` : ''}
         </div>
-        <div class="note-meta">
-          <span class="note-pills">${pills}</span>
-          <select class="status-select" onchange="setNoteStatus('${p.id}', this.value, this.closest('.note-row').dataset.status)">
-            ${opts}
-          </select>
-        </div>
+        <select class="status-select" onchange="setNoteStatus('${p.id}', this.value, this.closest('.note-row').dataset.status)">
+          ${opts}
+        </select>
         <div class="note-preview" id="preview-${p.id}" style="display:none;"></div>
       </div>`;
         }

@@ -337,10 +337,7 @@
     }
 
     .note-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 8px 0;
+        padding: 9px 0;
         border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
     }
 
@@ -348,20 +345,135 @@
         border-bottom: none;
     }
 
-    .note-title {
-        flex: 2;
-        font-size: 14px;
+    .note-main {
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .note-select {
+    .note-caret {
+        border: none;
+        background: none;
+        cursor: pointer;
+        color: #999;
+        font-size: 12px;
+        line-height: 1;
+        padding: 2px 4px;
+        flex-shrink: 0;
+        transition: transform 0.15s ease;
+    }
+
+    .note-caret.open {
+        transform: rotate(90deg);
+    }
+
+    .note-title-link {
         flex: 1;
+        font-size: 14px;
+        color: #2b2b2b;
+        text-decoration: none;
+        border-bottom: 0.5px solid transparent;
+    }
+
+    .note-title-link:hover {
+        color: #000;
+        border-bottom-color: rgba(0, 0, 0, 0.25);
     }
 
     .note-age {
         font-size: 12px;
         color: #888;
-        min-width: 70px;
-        text-align: right;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .note-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 6px 0 0 26px;
+        flex-wrap: wrap;
+    }
+
+    .note-pills {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+
+    .status-select {
+        flex-shrink: 0;
+    }
+
+    .type-pill {
+        font-size: 11px;
+        padding: 1px 7px;
+        border-radius: 999px;
+        border: 0.5px solid;
+        background: transparent;
+        white-space: nowrap;
+    }
+
+    .note-preview {
+        margin: 7px 0 2px 26px;
+        font-size: 13px;
+        color: #555;
+        line-height: 1.45;
+        background: #f6f5f0;
+        border-radius: 8px;
+        padding: 8px 10px;
+    }
+
+    .note-group-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #888;
+        margin-bottom: 8px;
+    }
+
+    .inbox-count {
+        font-size: 12px;
+        font-weight: 500;
+        color: #999;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .undo-toast {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        transform: translateX(-50%) translateY(20px);
+        background: #2b2b2b;
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 13px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        z-index: 1000;
+    }
+
+    .undo-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+    }
+
+    .undo-btn {
+        background: none;
+        border: none;
+        color: #8fb7ff;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 13px;
+        padding: 0;
     }
 
     select {
@@ -797,12 +909,11 @@
     <div class="jump-bar">
         <button class="jump-btn" onclick="document.getElementById('sec-inbox').scrollIntoView({behavior:'smooth'})">📥 Notes Inbox</button>
         <button class="jump-btn" onclick="document.getElementById('sec-undone').scrollIntoView({behavior:'smooth'})">⚠️ What Didn't Get Done</button>
-        <button class="jump-btn" onclick="document.getElementById('sec-habits').scrollIntoView({behavior:'smooth'})">🔵 Habit Pulse</button>
         <button class="jump-btn" onclick="document.getElementById('sec-reflection').scrollIntoView({behavior:'smooth'})">✍️ Weekly Reflection</button>
         <button class="jump-btn" onclick="document.getElementById('sec-plan').scrollIntoView({behavior:'smooth'})">🎯 Plan Ahead</button>
     </div>
 
-    <div class="grid-5">
+    <div class="grid-5" style="grid-template-columns:repeat(4,1fr);">
         <div class="metric">
             <p class="metric-label">Active projects</p>
             <p class="metric-value" id="metric-projects">—</p>
@@ -818,10 +929,6 @@
         <div class="metric">
             <p class="metric-label">Unprocessed notes</p>
             <p class="metric-value" id="metric-notes">—</p>
-        </div>
-        <div class="metric">
-            <p class="metric-label">Habit avg this week</p>
-            <p class="metric-value" id="metric-habits">—</p>
         </div>
     </div>
 
@@ -911,7 +1018,7 @@
     </div>
 
     <div id="sec-inbox">
-        <p class="section-title">Note Inbox — Process &amp; Assign</p>
+        <p class="section-title">Note Inbox — Process &amp; Assign <span id="inbox-count" class="inbox-count"></span></p>
         <div class="card" style="margin-bottom:1.5rem;" id="notes-list">
             <p class="loading">Loading notes…</p>
         </div>
@@ -947,65 +1054,16 @@
         <span class="loading">Loading projects…</span>
     </div>
 
-    <div class="grid-2">
-        <div>
-            <p class="section-title">Active Projects — Set Priorities</p>
-            <div class="card" id="projects-list">
-                <p class="loading">Loading projects…</p>
-            </div>
-        </div>
-        <div>
-            <p class="section-title">Tasks — Next Two Weeks</p>
-            <div class="card" id="tasks-list">
-                <p class="loading">Loading tasks…</p>
-            </div>
-        </div>
+    <p class="section-title">Active Projects — Set Priorities</p>
+    <div class="card" id="projects-list" style="margin-bottom:1.5rem;">
+        <p class="loading">Loading projects…</p>
     </div>
 
     <div class="grid-2" style="margin-bottom:1.5rem;">
-        <div id="sec-habits">
-            <p class="section-title">
-                Habit Pulse — Week Ending 
-                <span id="habitWeekLabel"></span>
-            </p>
-            <div class="card">
-                <p style="font-size:12px;color:#888;margin-bottom:10px;">Tap dots to log this week from Habitify:</p>
-                <div class="habit-row">
-                    <span class="habit-name">Morning stretch</span>
-                    <div class="habit-score" id="h0"></div>
-                </div>
-                <div class="habit-row">
-                    <span class="habit-name">Daily bread</span>
-                    <div class="habit-score" id="h1"></div>
-                </div>
-                <div class="habit-row">
-                    <span class="habit-name">Prayer / quiet time</span>
-                    <div class="habit-score" id="h2"></div>
-                </div>
-                <div class="habit-row">
-                    <span class="habit-name">Highlight journaling</span>
-                    <div class="habit-score" id="h3"></div>
-                </div>
-                <div class="habit-row">
-                    <span class="habit-name">Make up bed</span>
-                    <div class="habit-score" id="h4"></div>
-                </div>
-                <div class="habit-row">
-                    <span class="habit-name">Daily declaration</span>
-                    <div class="habit-score" id="h5"></div>
-                </div>
-                <div class="habit-row">
-                    <span class="habit-name">Step count</span>
-                    <div class="habit-score" id="h6"></div>
-                </div>
-                <div class="habit-row">
-                    <span class="habit-name">Exercise</span>
-                    <div class="habit-score" id="h7"></div>
-                </div>
-                <div class="habit-row">
-                    <span class="habit-name">Next day prep</span>
-                    <div class="habit-score" id="h8"></div>
-                </div>
+        <div id="sec-tasks">
+            <p class="section-title">Tasks — Next Two Weeks</p>
+            <div class="card" id="tasks-list">
+                <p class="loading">Loading tasks…</p>
             </div>
         </div>
         <div id="sec-undone">
@@ -1144,7 +1202,6 @@
     }
     const DATES = getReviewDates();
     document.getElementById('weekLabel').textContent = 'Week ending ' + formatDate(DATES.weekEnd) + ' · Looking ahead to ' + formatDate(DATES.w2e);
-    document.getElementById('habitWeekLabel').textContent = formatDate(DATES.weekEnd);
     document.getElementById('week1Label').textContent = 'Week 1 · ' + formatDate(DATES.w1s) + ' – ' + formatDate(DATES.w1e);
     document.getElementById('week2Label').textContent = 'Week 2 · ' + formatDate(DATES.w2s) + ' – ' + formatDate(DATES.w2e);
 
@@ -1420,6 +1477,40 @@
         return null;
     }
 
+    // Emoji-proof multi-select "Type" reader → array of value names
+    function getType(page) {
+        let fallback = null;
+        for (const key of Object.keys(page.properties)) {
+            const p = page.properties[key];
+            if (p.type === 'multi_select') {
+                const names = (p.multi_select || []).map(o => o.name);
+                if (key.toLowerCase().includes('type')) return names;
+                if (!fallback) fallback = names;
+            }
+        }
+        return fallback || [];
+    }
+
+    // Emoji-proof "Date" field reader (the date you set on the note, not created/edited)
+    function getNoteDate(page) {
+        for (const key of Object.keys(page.properties)) {
+            const p = page.properties[key];
+            if (p.type === 'date' && key.toLowerCase().includes('date') && p.date?.start)
+                return new Date(p.date.start);
+        }
+        return null;
+    }
+
+    // Common type values get stable colors; anything else falls to neutral so new types still render.
+    const TYPE_COLOR = {
+        Reminder: '#D8772B', Idea: '#7F77DD', Thought: '#1D9E75', Convo: '#378ADD',
+        Sermon: '#C0392B', Teaching: '#8E44AD', Dream: '#CC5A93'
+    };
+    function typePillHtml(name) {
+        const color = TYPE_COLOR[name] || '#9A958C';
+        return `<span class="type-pill" style="color:${color};border-color:${color};">${escTag(name)}</span>`;
+    }
+
     function pillHtml(domain, small) {
         const style = DOMAIN_STYLE[domain];
         const cls = style ? style.pill : 'pill-unknown';
@@ -1599,8 +1690,9 @@
     // ─── RENDER NOTES ─────────────────────────────────────────
     function renderNotes(pages) {
         const list = document.getElementById('notes-list');
-        document.getElementById('metric-notes').textContent = pages.length;
         if (!pages.length) {
+            const c = document.getElementById('inbox-count'); if (c) c.textContent = '';
+            const m = document.getElementById('metric-notes'); if (m) m.textContent = 0;
             list.innerHTML = '<p class="empty">Inbox zero — all notes are processed.</p>';
             return;
         }
@@ -1609,71 +1701,151 @@
         const thisWk = pages.filter(p => now - getCreatedDate(p).getTime() <= oneWk);
         const older = pages.filter(p => now - getCreatedDate(p).getTime() > oneWk);
         function noteRow(p) {
+            const status = (getStatus(p) || '').toUpperCase();
+            const domain = getProjectDomain(p);
+            const types = getType(p).slice(0, 4); // cap at 4 (rarely more than 3)
+            const url = p.url || '#';
+            const opts = ['INBOX', 'ACTIVE', 'CLOSED']
+                .map(s => `<option ${s === status ? 'selected' : ''}>${s}</option>`).join('');
+            const pills = (domain ? pillHtml(domain, true) : '') + types.map(typePillHtml).join('');
             return `
-      <div class="note-row" data-page-id="${p.id}">
-        <i class="ti ti-note" style="font-size:16px;color:#888;flex-shrink:0;"></i>
-        <span class="note-title">${
-            getTitle(p)}</span>
-        <span class="note-select">
-          <select onchange="assignDomain('${
-            p.id}',this.value)">
-            <option value="">Assign domain…</option>
-            <option>RCBS</option><option>RWS</option><option>SM</option><option>MTS</option><option>EPLC</option>
+      <div class="note-row" data-page-id="${p.id}" data-status="${status}">
+        <div class="note-main">
+          <button class="note-caret" onclick="toggleNotePreview('${p.id}', this)" title="Preview note" aria-label="Preview note">▸</button>
+          <a class="note-title-link" href="${url}" target="_blank" rel="noopener">${escTag(getTitle(p))}</a>
+          <span class="note-age">${daysAgo(getCreatedDate(p))}</span>
+        </div>
+        <div class="note-meta">
+          <span class="note-pills">${pills}</span>
+          <select class="status-select" onchange="setNoteStatus('${p.id}', this.value, this.closest('.note-row').dataset.status)">
+            ${opts}
           </select>
-        </span>
-        <span class="note-age">${
-
-
-
-            daysAgo(getCreatedDate(p))}</span>
-      </div>`
-            ;
+        </div>
+        <div class="note-preview" id="preview-${p.id}" style="display:none;"></div>
+      </div>`;
         }
         list.innerHTML =
-        (thisWk.length ? `<p style="font-size:12px;font-weight:500;color:#888;margin-bottom:8px;">This Week</p>${thisWk.map(noteRow).join('')}` : '') +
-        (older.length ? `<p style="font-size:12px;font-weight:500;color:#888;margin:12px 0 8px;">Older</p>${older.map(noteRow).join('')}` : '');
+            (thisWk.length ? `<p class="note-group-label">This Week</p>${thisWk.map(noteRow).join('')}` : '') +
+            (older.length ? `<p class="note-group-label" style="margin-top:12px;">Older</p>${older.map(noteRow).join('')}` : '');
+        updateInboxCount();
     }
 
-    // ─── ASSIGN DOMAIN (Notes — uses relation field) ──────────
-    async function assignDomain(pageId, domain) {
-        if (!domain)
-            return;
+    // Live split count from the rows currently in the DOM (keeps close/undo/status changes in sync)
+    function updateInboxCount() {
+        const list = document.getElementById('notes-list');
+        const rows = list ? list.querySelectorAll('.note-row') : [];
+        let inb = 0, act = 0;
+        rows.forEach(r => {
+            const s = (r.dataset.status || '').toUpperCase();
+            if (s === 'INBOX') inb++;
+            else if (s === 'ACTIVE') act++;
+        });
+        const total = inb + act;
+        const c = document.getElementById('inbox-count');
+        if (c) c.textContent = total ? `${total} · ${inb} Inbox · ${act} Active` : '';
+        const m = document.getElementById('metric-notes');
+        if (m) m.textContent = total;
+        if (!rows.length && list) list.innerHTML = '<p class="empty">Inbox zero — all notes are processed.</p>';
+    }
+
+    // ─── STATUS UPDATE (instant close + undo) ─────────────────
+    let _undoTimer = null;
+    async function setNoteStatus(pageId, newStatus, prevStatus) {
+        if (!newStatus || newStatus === prevStatus) return;
+        const row = document.querySelector(`.note-row[data-page-id="${pageId}"]`);
         try {
-            const domainPageId = Object.keys(domainMap).find(k => domainMap[k] === domain);
-            if (!domainPageId) {
-                alert('Could not find domain: ' + domain);
-                return;
-            }
-            // Find the domain relation field key by looping (emoji-proof)
-            const pages = await notionQuery(DB_NOTES, null);
-            const page = pages.find(p => p.id === pageId);
-            let fieldKey = null;
-            if (page) {
-                for (const key of Object.keys(page.properties)) {
-                    if (page.properties[key].type === 'relation' && key.toLowerCase().includes('domain')) {
-                        fieldKey = key;
-                        break;
-                    }
+            const statusKey = await getNotesStatusKey();
+            await notionPatch(pageId, { [statusKey]: { status: { name: newStatus } } });
+            if (newStatus === 'CLOSED') {
+                if (row) {
+                    const parent = row.parentNode;
+                    const next = row.nextSibling;
+                    row.remove();
+                    updateInboxCount();
+                    showUndo('Note closed', async () => {
+                        try {
+                            await notionPatch(pageId, { [statusKey]: { status: { name: prevStatus } } });
+                            if (next && next.parentNode === parent) parent.insertBefore(row, next);
+                            else parent.appendChild(row);
+                            const sel = row.querySelector('.status-select');
+                            if (sel) sel.value = prevStatus;
+                            row.dataset.status = prevStatus;
+                            updateInboxCount();
+                        } catch (e) {
+                            alert('Could not undo: ' + e.message);
+                        }
+                    });
                 }
+            } else {
+                if (row) row.dataset.status = newStatus;
+                updateInboxCount();
             }
-            if (fieldKey) {
-                await notionPatch(pageId, {
-                    [fieldKey]: {
-                        relation: [{
-                            id: domainPageId
-                        }]
-                    }
-                });
-            }
-            const row = document.querySelector(`[data-page-id="${pageId}"]`);
-            if (row) {
-                row.style.opacity = '0.4';
-                setTimeout(() => row.remove(), 400);
-            }
-            const cur = parseInt(document.getElementById('metric-notes').textContent) || 0;
-            document.getElementById('metric-notes').textContent = Math.max(0, cur - 1);
         } catch (e) {
-            alert('Could not save to Notion. Please try again.');
+            alert('Could not update status: ' + e.message);
+            if (row) {
+                const sel = row.querySelector('.status-select');
+                if (sel) sel.value = prevStatus; // revert dropdown on failure
+            }
+        }
+    }
+
+    function showUndo(msg, onUndo) {
+        clearTimeout(_undoTimer);
+        let toast = document.getElementById('undo-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'undo-toast';
+            toast.className = 'undo-toast';
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = `<span>${msg}</span><button class="undo-btn">Undo</button>`;
+        toast.classList.add('show');
+        toast.querySelector('.undo-btn').onclick = () => {
+            clearTimeout(_undoTimer);
+            toast.classList.remove('show');
+            onUndo();
+        };
+        _undoTimer = setTimeout(() => toast.classList.remove('show'), 6000);
+    }
+
+    // ─── NOTE PREVIEW (lazy — fetches body only when expanded) ─
+    const _previewCache = {};
+    function blockText(b) {
+        const t = b.type;
+        const rt = b[t] && b[t].rich_text;
+        return Array.isArray(rt) ? rt.map(r => r.plain_text).join('') : '';
+    }
+    async function toggleNotePreview(pageId, btn) {
+        const box = document.getElementById('preview-' + pageId);
+        if (!box) return;
+        const isOpen = box.style.display !== 'none';
+        if (isOpen) {
+            box.style.display = 'none';
+            btn.classList.remove('open');
+            return;
+        }
+        btn.classList.add('open');
+        box.style.display = 'block';
+        if (_previewCache[pageId] !== undefined) {
+            box.textContent = _previewCache[pageId];
+            return;
+        }
+        box.textContent = 'Loading…';
+        try {
+            const res = await fetch(`${PROXY}/blocks/${pageId}/children?page_size=25`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json', 'Notion-Version': '2022-06-28' }
+            });
+            if (!res.ok) throw new Error('error ' + res.status);
+            const data = await res.json();
+            const text = (data.results || []).map(blockText).filter(Boolean).join('  ').trim();
+            const hint = text
+                ? (text.length > 240 ? text.slice(0, 240) + '…' : text)
+                : '(No text in the note body — open in Notion to view.)';
+            _previewCache[pageId] = hint;
+            box.textContent = hint;
+        } catch (e) {
+            box.textContent = 'Could not load preview (' + e.message + ').';
         }
     }
 
@@ -1717,6 +1889,15 @@
             }
         }
         return null;
+    }
+
+    // Exact Status property name (for writes) — discovered by type, emoji-proof
+    async function getNotesStatusKey() {
+        const db = await getNotesSchema();
+        for (const [name, prop] of Object.entries(db.properties)) {
+            if (prop.type === 'status') return name;
+        }
+        throw new Error('No status property found in Notes database');
     }
     // Turn [heading, text] pairs into Notion page-body blocks. Skips empty text.
     function buildBlocks(sections) {
@@ -1816,8 +1997,6 @@
         document.querySelectorAll('textarea').forEach(t => t.value = '');
         document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
         document.querySelectorAll('.time-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
-        buildHabitDots();
-        document.getElementById('metric-habits').textContent = '—';
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
@@ -1875,8 +2054,8 @@
     function tagCountsForWindow(notes, tagKey, start, end) {
         const counts = {};
         notes.forEach(p => {
-            const created = getCreatedDate(p);
-            if (created >= start && created <= end) {
+            const when = getNoteDate(p) || getCreatedDate(p); // your "Date" field; created date if blank
+            if (when >= start && when <= end) {
                 const rel = (p.properties[tagKey] && p.properties[tagKey].relation) || [];
                 rel.forEach(r => {
                     const name = tagMap[r.id] || '(unknown tag)';

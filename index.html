@@ -64,6 +64,55 @@
         margin-bottom: 1.5rem;
     }
 
+    .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .tag-window-label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #888;
+        margin: 0 0 6px;
+    }
+
+    .tag-row {
+        margin-bottom: 7px;
+    }
+
+    .tag-row-head {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 2px;
+    }
+
+    .tag-row-count {
+        color: #999;
+    }
+
+    .tag-bar {
+        height: 4px;
+        background: #ecebe4;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .tag-bar-fill {
+        height: 100%;
+        background: #7c5cff;
+    }
+
+    @media (max-width: 640px) {
+        .grid-3 {
+            grid-template-columns: 1fr;
+        }
+    }
+
     .metric {
         background: #f0efe9;
         border-radius: 8px;
@@ -861,6 +910,29 @@
         <p class="cal-source" id="cal-source">Pulls from: RCBS · MTS</p>
     </div>
 
+    <div id="sec-inbox">
+        <p class="section-title">Note Inbox — Process &amp; Assign</p>
+        <div class="card" style="margin-bottom:1.5rem;" id="notes-list">
+            <p class="loading">Loading notes…</p>
+        </div>
+    </div>
+
+    <p class="section-title">Tag Pulse — Common Tags</p>
+    <div class="grid-3">
+        <div>
+            <p class="tag-window-label">This Week</p>
+            <div class="card" id="tags-thisweek"><p class="loading">Loading tags…</p></div>
+        </div>
+        <div>
+            <p class="tag-window-label">Last Week</p>
+            <div class="card" id="tags-lastweek"><p class="loading">Loading tags…</p></div>
+        </div>
+        <div>
+            <p class="tag-window-label">This Month</p>
+            <div class="card" id="tags-thismonth"><p class="loading">Loading tags…</p></div>
+        </div>
+    </div>
+
     <p class="section-title">Filter By Domain</p>
     <div class="filter-bar" id="filterBar" style="margin-bottom:6px;">
         <span class="domain-pill pill-rcbs" data-domain="RCBS" onclick="toggleDomain('RCBS')">RCBS</span>
@@ -887,13 +959,6 @@
             <div class="card" id="tasks-list">
                 <p class="loading">Loading tasks…</p>
             </div>
-        </div>
-    </div>
-
-    <div id="sec-inbox">
-        <p class="section-title">Note Inbox — Process &amp; Assign</p>
-        <div class="card" style="margin-bottom:1.5rem;" id="notes-list">
-            <p class="loading">Loading notes…</p>
         </div>
     </div>
 
@@ -1020,6 +1085,7 @@
     const DB_TASKS    = '33110b0375a880c18918ebac71592a35';      // ← paste your Tasks database ID
     const DB_NOTES    = '6340f2b86ac94447a8315f0ba87545e3';      // ← paste your Notes database ID
     const DB_DOMAINS  = '33110b0375a88024b4f2c8e6beaca80e';    // ← paste your Domains database ID
+    const DB_TAGS     = '1a39ff9fd10747ad9d418577707c012f';       // ← paste your Global Tags database ID
     const PROXY = 'https://notion-proxy.renitacbsmith.workers.dev/v1';
     // ═══════════════════════════════════════════════════════════
 
@@ -1206,34 +1272,47 @@
     }
 
     // ─── NOTION API ───────────────────────────────────────────
-    async function notionQuery(dbId, filter) {
-        const res = await fetch(`${PROXY}/databases/${dbId}/query`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Notion-Version': '2022-06-28'
-            },
-            body: JSON.stringify(filter ? {
-                filter
-            } : {}),
-        });
-        if (!res.ok)
-            throw new Error('Notion API error ' + res.status);
-        return (await res.json()).results || [];
+    async function notionQuery(dbId, filter, sorts) {
+        // Loops on has_more / next_cursor so we fetch ALL rows, not just the first 100.
+        let results = [];
+        let cursor;
+        do {
+            const body = { page_size: 100 };
+            if (filter) body.filter = filter;
+            if (sorts) body.sorts = sorts;
+            if (cursor) body.start_cursor = cursor;
+            const res = await fetch(`${PROXY}/databases/${dbId}/query`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Notion-Version': '2022-06-28'
+                },
+                body: JSON.stringify(body),
+            });
+            if (!res.ok)
+                throw new Error('Notion API error ' + res.status);
+            const data = await res.json();
+            results = results.concat(data.results || []);
+            cursor = data.has_more ? data.next_cursor : undefined;
+        } while (cursor);
+        return results;
     }
-    async function notionCreate(dbId, properties) {
+    async function notionCreate(dbId, properties, children) {
+        const payload = {
+            parent: {
+                database_id: dbId
+            },
+            properties
+        };
+        if (children && children.length)
+            payload.children = children;
         const res = await fetch(`${PROXY}/pages`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Notion-Version': '2022-06-28'
             },
-            body: JSON.stringify({
-                parent: {
-                    database_id: dbId
-                },
-                properties
-            }),
+            body: JSON.stringify(payload),
         });
         if (!res.ok)
             throw new Error('Notion create error ' + res.status);
@@ -1599,6 +1678,67 @@
     }
 
     // ─── SAVE REFLECTION ──────────────────────────────────────
+    // ─── SAVE HELPERS — emoji-proof title key + body blocks ───
+    // Finds the Notes title property by type (not by hardcoded name),
+    // since writes need the exact property name and yours carry emoji prefixes.
+    let _notesSchema = null;
+    async function getNotesSchema() {
+        if (_notesSchema) return _notesSchema;
+        const res = await fetch(`${PROXY}/databases/${DB_NOTES}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            }
+        });
+        if (!res.ok)
+            throw new Error('Notion schema error ' + res.status);
+        _notesSchema = await res.json();
+        return _notesSchema;
+    }
+
+    async function getNotesTitleKey() {
+        const db = await getNotesSchema();
+        for (const [name, prop] of Object.entries(db.properties)) {
+            if (prop.type === 'title') return name;
+        }
+        throw new Error('No title property found in Notes database');
+    }
+
+    // Finds the Notes relation property that points at the Global Tags DB —
+    // matched by target database_id (name-proof + emoji-proof), not by field name.
+    const stripDashes = s => (s || '').replace(/-/g, '');
+    async function getNotesTagKey() {
+        const db = await getNotesSchema();
+        for (const [name, prop] of Object.entries(db.properties)) {
+            if (prop.type === 'relation' && prop.relation &&
+                stripDashes(prop.relation.database_id) === stripDashes(DB_TAGS)) {
+                return name;
+            }
+        }
+        return null;
+    }
+    // Turn [heading, text] pairs into Notion page-body blocks. Skips empty text.
+    function buildBlocks(sections) {
+        const blocks = [];
+        sections.forEach(([heading, body]) => {
+            if (!body) return;
+            blocks.push({
+                object: 'block',
+                type: 'heading_3',
+                heading_3: { rich_text: [{ type: 'text', text: { content: heading } }] }
+            });
+            body.split('\n').forEach(line => {
+                blocks.push({
+                    object: 'block',
+                    type: 'paragraph',
+                    paragraph: { rich_text: line ? [{ type: 'text', text: { content: line } }] : [] }
+                });
+            });
+        });
+        return blocks;
+    }
+
     async function saveReflection() {
         const needle = document.getElementById('ref-needle').value.trim();
         const didnt = document.getElementById('ref-didnt').value.trim();
@@ -1608,18 +1748,25 @@
             return;
         }
         try {
+            const titleKey = await getNotesTitleKey();
+            const blocks = buildBlocks([
+                ['What moved the needle?', needle],
+                ["What didn't work?", didnt],
+                ['Carrying into next week', carry]
+            ]);
             await notionCreate(DB_NOTES, {
-                Name: {
+                [titleKey]: {
                     title: [{
                         text: {
                             content: 'Weekly Reflection — ' + formatDate(DATES.weekEnd)
                         }
                     }]
-                },
-            });
+                }
+            }, blocks);
             alert('Reflection saved to Notion!');
         } catch (e) {
-            alert('Could not save. Please try again.');
+            console.error(e);
+            alert('Could not save: ' + e.message);
         }
     }
 
@@ -1635,18 +1782,24 @@
             return;
         }
         try {
+            const titleKey = await getNotesTitleKey();
+            const blocks = buildBlocks([
+                ['Overall theme', theme],
+                ['1% Goals', goals]
+            ]);
             await notionCreate(DB_NOTES, {
-                Name: {
+                [titleKey]: {
                     title: [{
                         text: {
                             content: 'Plan Ahead — ' + formatDate(DATES.w1s) + ' to ' + formatDate(DATES.w2e)
                         }
                     }]
-                },
-            });
+                }
+            }, blocks);
             alert('Plan saved to Notion!');
         } catch (e) {
-            alert('Could not save. Please try again.');
+            console.error(e);
+            alert('Could not save: ' + e.message);
         }
     }
 
@@ -1696,6 +1849,90 @@
     }
 
     // ─── INIT ─────────────────────────────────────────────────
+    // ─── TAG PULSE — common tags by time window ───
+    let tagMap = {}; // tag page id → tag name
+
+    function getTagWindows() {
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const thisWeekStart = new Date(startOfToday);
+        thisWeekStart.setDate(startOfToday.getDate() - now.getDay()); // week starts Sunday, matching the dashboard
+        const lastWeekStart = new Date(thisWeekStart);
+        lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+        const lastWeekEnd = new Date(thisWeekStart.getTime() - 1); // ends just before this week begins (no overlap)
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        return {
+            thisweek: [thisWeekStart, now],
+            lastweek: [lastWeekStart, lastWeekEnd],
+            thismonth: [monthStart, now]
+        };
+    }
+
+    // Counts tag frequency across notes whose created date falls in [start, end].
+    // NOTE: a Notion query returns at most 25 related items per relation property.
+    // Confirmed none of these notes carry 25+ tags, so no per-note follow-up fetch is needed.
+    // If notes ever exceed 25 tags, fetch that page individually to read the full relation.
+    function tagCountsForWindow(notes, tagKey, start, end) {
+        const counts = {};
+        notes.forEach(p => {
+            const created = getCreatedDate(p);
+            if (created >= start && created <= end) {
+                const rel = (p.properties[tagKey] && p.properties[tagKey].relation) || [];
+                rel.forEach(r => {
+                    const name = tagMap[r.id] || '(unknown tag)';
+                    counts[name] = (counts[name] || 0) + 1;
+                });
+            }
+        });
+        return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    }
+
+    function escTag(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    function renderTagPanel(elId, ranked) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        if (!ranked.length) {
+            el.innerHTML = '<p class="cal-source" style="margin:0;">No tags in this window.</p>';
+            return;
+        }
+        const max = ranked[0][1];
+        el.innerHTML = ranked.slice(0, 8).map(([name, count]) => {
+            const pct = Math.round((count / max) * 100);
+            return `<div class="tag-row">
+                <div class="tag-row-head"><span>${escTag(name)}</span><span class="tag-row-count">${count}</span></div>
+                <div class="tag-bar"><div class="tag-bar-fill" style="width:${pct}%;"></div></div>
+            </div>`;
+        }).join('');
+    }
+
+    // Isolated from the main panels: a tag failure shows only inside the tag block.
+    async function renderTagPulse(notes) {
+        const panels = ['tags-thisweek', 'tags-lastweek', 'tags-thismonth'];
+        try {
+            const tagKey = await getNotesTagKey();
+            if (!tagKey)
+                throw new Error('No relation to the Tags DB found on Notes — check DB_TAGS and that the Notes relation points to it.');
+            const tagPages = await notionQuery(DB_TAGS, null);
+            tagMap = {};
+            tagPages.forEach(t => { tagMap[t.id] = getTitle(t); });
+            const w = getTagWindows();
+            renderTagPanel('tags-thisweek', tagCountsForWindow(notes, tagKey, w.thisweek[0], w.thisweek[1]));
+            renderTagPanel('tags-lastweek', tagCountsForWindow(notes, tagKey, w.lastweek[0], w.lastweek[1]));
+            renderTagPanel('tags-thismonth', tagCountsForWindow(notes, tagKey, w.thismonth[0], w.thismonth[1]));
+        } catch (e) {
+            console.error('Tag pulse:', e);
+            panels.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = `<p class="error-msg">⚠️ ${e.message}</p>`;
+            });
+        }
+    }
+
     async function init() {
         buildHabitDots();
         try {
@@ -1707,7 +1944,7 @@
             const [projects, tasks, notes] = await Promise.all([
             notionQuery(DB_PROJECTS, null),
             notionQuery(DB_TASKS, null),
-            notionQuery(DB_NOTES, null),
+            notionQuery(DB_NOTES, null, [{ timestamp: 'created_time', direction: 'descending' }]),
             ]);
 
             const projectMap = {};
@@ -1717,10 +1954,11 @@
             renderProjects(projects);
             renderTasks(tasks, projectMap);
             const inbox = notes.filter(p => {
-                const s = getStatus(p);
-                return s === 'Inbox' || s === 'Active';
+                const s = (getStatus(p) || '').toUpperCase();
+                return s === 'INBOX' || s === 'ACTIVE';
             });
             renderNotes(inbox);
+            renderTagPulse(notes);
         } catch (e) {
             console.error(e);
             ['projects-list', 'tasks-list', 'notes-list', 'overdue-list'].forEach(id => {

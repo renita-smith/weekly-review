@@ -419,6 +419,15 @@
         white-space: nowrap;
     }
 
+    .tag-pill {
+        font-size: 11px;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: #ecebe4;
+        color: #6b675f;
+        white-space: nowrap;
+    }
+
     .note-preview {
         flex-basis: 100%;
         margin: 7px 0 2px 26px;
@@ -1727,6 +1736,10 @@
             const opts = ['INBOX', 'ACTIVE', 'CLOSED']
                 .map(s => `<option ${s === status ? 'selected' : ''}>${s}</option>`).join('');
             const pills = (domain ? pillHtml(domain, true) : '') + types.map(typePillHtml).join('');
+            const tagNames = (tagsLoaded && notesTagKey)
+                ? (p.properties[notesTagKey]?.relation || []).map(r => tagMap[r.id]).filter(Boolean)
+                : [];
+            const allPills = pills + tagNames.map(tagPillHtml).join('');
             return `
       <div class="note-row" data-page-id="${p.id}" data-status="${status}">
         <div class="note-left">
@@ -1735,7 +1748,7 @@
             <a class="note-title-link" href="${url}" target="_blank" rel="noopener">${escTag(getTitle(p))}</a>
             <span class="note-age">${noteAgeLabel(p)}</span>
           </div>
-          ${pills ? `<div class="note-pills">${pills}</div>` : ''}
+          ${allPills ? `<div class="note-pills">${allPills}</div>` : ''}
         </div>
         <select class="status-select" onchange="setNoteStatus('${p.id}', this.value, this.closest('.note-row').dataset.status)">
           ${opts}
@@ -2048,7 +2061,23 @@
 
     // ─── INIT ─────────────────────────────────────────────────
     // ─── TAG PULSE — common tags by time window ───
-    let tagMap = {}; // tag page id → tag name
+    let tagMap = {};        // tag page id → tag name
+    let notesTagKey = null; // Notes relation property that points at the Tags DB
+    let tagsLoaded = false;
+
+    // Resolve the tag relation + build the id→name map once; reused by note pills and Tag Pulse.
+    async function loadTags() {
+        notesTagKey = await getNotesTagKey();
+        if (!notesTagKey) { tagsLoaded = false; return; }
+        const tagPages = await notionQuery(DB_TAGS, null);
+        tagMap = {};
+        tagPages.forEach(t => { tagMap[t.id] = getTitle(t); });
+        tagsLoaded = true;
+    }
+
+    function tagPillHtml(name) {
+        return `<span class="tag-pill">${escTag(name)}</span>`;
+    }
 
     function getTagWindows() {
         const now = new Date();
@@ -2112,16 +2141,15 @@
     async function renderTagPulse(notes) {
         const panels = ['tags-thisweek', 'tags-lastweek', 'tags-thismonth'];
         try {
-            const tagKey = await getNotesTagKey();
-            if (!tagKey)
+            if (!tagsLoaded) await loadTags();
+            if (!notesTagKey)
                 throw new Error('No relation to the Tags DB found on Notes — check DB_TAGS and that the Notes relation points to it.');
-            const tagPages = await notionQuery(DB_TAGS, null);
-            tagMap = {};
-            tagPages.forEach(t => { tagMap[t.id] = getTitle(t); });
+            if (!tagsLoaded)
+                throw new Error('Could not load the Tags database — check DB_TAGS is pasted in and connected to the integration.');
             const w = getTagWindows();
-            renderTagPanel('tags-thisweek', tagCountsForWindow(notes, tagKey, w.thisweek[0], w.thisweek[1]));
-            renderTagPanel('tags-lastweek', tagCountsForWindow(notes, tagKey, w.lastweek[0], w.lastweek[1]));
-            renderTagPanel('tags-thismonth', tagCountsForWindow(notes, tagKey, w.thismonth[0], w.thismonth[1]));
+            renderTagPanel('tags-thisweek', tagCountsForWindow(notes, notesTagKey, w.thisweek[0], w.thisweek[1]));
+            renderTagPanel('tags-lastweek', tagCountsForWindow(notes, notesTagKey, w.lastweek[0], w.lastweek[1]));
+            renderTagPanel('tags-thismonth', tagCountsForWindow(notes, notesTagKey, w.thismonth[0], w.thismonth[1]));
         } catch (e) {
             console.error('Tag pulse:', e);
             panels.forEach(id => {
@@ -2155,6 +2183,7 @@
                 const s = (getStatus(p) || '').toUpperCase();
                 return s === 'INBOX' || s === 'ACTIVE';
             });
+            try { await loadTags(); } catch (e) { console.warn('Tags unavailable for note pills:', e.message); }
             renderNotes(inbox);
             renderTagPulse(notes);
         } catch (e) {

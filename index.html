@@ -364,12 +364,17 @@
         border: none;
         background: none;
         cursor: pointer;
-        color: #999;
-        font-size: 12px;
+        color: #8a8a8a;
+        font-size: 15px;
         line-height: 1;
-        padding: 2px 4px;
+        padding: 2px 7px 2px 2px;
+        margin-right: 1px;
         flex-shrink: 0;
         transition: transform 0.15s ease;
+    }
+
+    .note-caret:hover {
+        color: #555;
     }
 
     .note-caret.open {
@@ -394,6 +399,9 @@
         color: #888;
         white-space: nowrap;
         flex-shrink: 0;
+        align-self: center;
+        text-align: right;
+        min-width: 84px;
     }
 
     .note-pills {
@@ -452,6 +460,32 @@
         color: #999;
         text-transform: none;
         letter-spacing: 0;
+    }
+
+    .inbox-filter {
+        display: inline-flex;
+        gap: 2px;
+        background: #ecebe4;
+        border-radius: 8px;
+        padding: 2px;
+        margin-bottom: 12px;
+    }
+
+    .inbox-filter .seg {
+        border: none;
+        background: transparent;
+        font-size: 12px;
+        padding: 4px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #777;
+    }
+
+    .inbox-filter .seg.active {
+        background: #fff;
+        color: #2b2b2b;
+        font-weight: 500;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     }
 
     .undo-toast {
@@ -922,6 +956,7 @@
 
     <div class="jump-bar">
         <button class="jump-btn" onclick="document.getElementById('sec-inbox').scrollIntoView({behavior:'smooth'})">📥 Notes Inbox</button>
+        <button class="jump-btn" onclick="document.getElementById('sec-tags').scrollIntoView({behavior:'smooth'})">🏷️ Tag Pulse</button>
         <button class="jump-btn" onclick="document.getElementById('sec-undone').scrollIntoView({behavior:'smooth'})">⚠️ What Didn't Get Done</button>
         <button class="jump-btn" onclick="document.getElementById('sec-reflection').scrollIntoView({behavior:'smooth'})">✍️ Weekly Reflection</button>
         <button class="jump-btn" onclick="document.getElementById('sec-plan').scrollIntoView({behavior:'smooth'})">🎯 Plan Ahead</button>
@@ -1033,12 +1068,17 @@
 
     <div id="sec-inbox">
         <p class="section-title">Note Inbox — Process &amp; Assign <span id="inbox-count" class="inbox-count"></span></p>
+        <div class="inbox-filter">
+            <button class="seg active" data-filter="ALL" onclick="setInboxFilter('ALL', this)">All</button>
+            <button class="seg" data-filter="INBOX" onclick="setInboxFilter('INBOX', this)">Inbox</button>
+            <button class="seg" data-filter="ACTIVE" onclick="setInboxFilter('ACTIVE', this)">Active</button>
+        </div>
         <div class="card" style="margin-bottom:1.5rem;" id="notes-list">
             <p class="loading">Loading notes…</p>
         </div>
     </div>
 
-    <p class="section-title">Tag Pulse — Common Tags</p>
+    <p class="section-title" id="sec-tags">Tag Pulse — Common Tags</p>
     <div class="grid-3">
         <div>
             <p class="tag-window-label">This Week</p>
@@ -1744,15 +1784,15 @@
       <div class="note-row" data-page-id="${p.id}" data-status="${status}">
         <div class="note-left">
           <div class="note-main">
-            <button class="note-caret" onclick="toggleNotePreview('${p.id}', this)" title="Preview note" aria-label="Preview note">▸</button>
+            <button class="note-caret" onclick="toggleNotePreview('${p.id}', this)" title="Preview note" aria-label="Preview note">❯</button>
             <a class="note-title-link" href="${url}" target="_blank" rel="noopener">${escTag(getTitle(p))}</a>
-            <span class="note-age">${noteAgeLabel(p)}</span>
           </div>
           ${allPills ? `<div class="note-pills">${allPills}</div>` : ''}
         </div>
         <select class="status-select" onchange="setNoteStatus('${p.id}', this.value, this.closest('.note-row').dataset.status)">
           ${opts}
         </select>
+        <span class="note-age">${noteAgeLabel(p)}</span>
         <div class="note-preview" id="preview-${p.id}" style="display:none;"></div>
       </div>`;
         }
@@ -1778,6 +1818,48 @@
         const m = document.getElementById('metric-notes');
         if (m) m.textContent = total;
         if (!rows.length && list) list.innerHTML = '<p class="empty">Inbox zero — all notes are processed.</p>';
+        applyInboxFilter();
+    }
+
+    // ─── INBOX STATUS FILTER (client-side: All · Inbox · Active) ─
+    let _inboxFilter = 'ALL';
+    function setInboxFilter(filter, btn) {
+        _inboxFilter = filter;
+        document.querySelectorAll('.inbox-filter .seg').forEach(b => b.classList.toggle('active', b === btn));
+        applyInboxFilter();
+    }
+    function applyInboxFilter() {
+        const list = document.getElementById('notes-list');
+        if (!list) return;
+        let visible = 0;
+        list.querySelectorAll('.note-row').forEach(r => {
+            const s = (r.dataset.status || '').toUpperCase();
+            const show = _inboxFilter === 'ALL' || s === _inboxFilter;
+            r.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        // Hide a group label when every row beneath it is filtered out
+        list.querySelectorAll('.note-group-label').forEach(lbl => {
+            let anyVisible = false, n = lbl.nextElementSibling;
+            while (n && n.classList && n.classList.contains('note-row')) {
+                if (n.style.display !== 'none') { anyVisible = true; break; }
+                n = n.nextElementSibling;
+            }
+            lbl.style.display = anyVisible ? '' : 'none';
+        });
+        // Placeholder when the filter hides everything
+        let msg = list.querySelector('.filter-empty');
+        if (list.querySelector('.note-row') && visible === 0) {
+            if (!msg) {
+                msg = document.createElement('p');
+                msg.className = 'empty filter-empty';
+                list.appendChild(msg);
+            }
+            msg.textContent = `No ${_inboxFilter.toLowerCase()} notes.`;
+            msg.style.display = '';
+        } else if (msg) {
+            msg.style.display = 'none';
+        }
     }
 
     // ─── STATUS UPDATE (instant close + undo) ─────────────────

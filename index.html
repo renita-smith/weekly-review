@@ -172,6 +172,11 @@
         color: #0C447C;
     }
 
+    .pill-peeps {
+        background: #FBEAF3;
+        color: #7A1F52;
+    }
+
     .pill-unknown {
         background: #f0efe9;
         color: #888;
@@ -213,6 +218,10 @@
 
     .pill-active-eplc {
         border-color: #378ADD;
+    }
+
+    .pill-active-peeps {
+        border-color: #D45D9C;
     }
 
     .filter-bar {
@@ -319,6 +328,39 @@
         border-radius: 4px;
         margin-top: 2px;
         flex-shrink: 0;
+    }
+
+    .task-check, .overdue-check {
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+    }
+
+    .task-check.checked, .overdue-check.checked {
+        background: #2b8a3e;
+        border-color: #2b8a3e;
+        position: relative;
+    }
+
+    .task-check.checked::after, .overdue-check.checked::after {
+        content: '✓';
+        color: #fff;
+        font-size: 11px;
+        line-height: 16px;
+        position: absolute;
+        top: -1px;
+        left: 3px;
+    }
+
+    .task-row, .carried-row {
+        transition: opacity 0.3s ease;
+    }
+
+    .task-done {
+        opacity: 0.45;
+    }
+
+    .task-done .task-name, .task-done .overdue-name {
+        text-decoration: line-through;
     }
 
     .task-name {
@@ -872,6 +914,10 @@
         background: #E6F1FB;
     }
 
+    .plan-card-peeps {
+        background: #FBEAF3;
+    }
+
     .plan-label {
         font-size: 11px;
         font-weight: 600;
@@ -898,6 +944,10 @@
 
     .plan-label-eplc {
         color: #0C447C;
+    }
+
+    .plan-label-peeps {
+        color: #7A1F52;
     }
 
     .plan-card textarea {
@@ -1101,6 +1151,7 @@
         <span class="domain-pill pill-sm" data-domain="SM" onclick="toggleDomain('SM')">SM</span>
         <span class="domain-pill pill-mts" data-domain="MTS" onclick="toggleDomain('MTS')">MTS</span>
         <span class="domain-pill pill-eplc" data-domain="EPLC" onclick="toggleDomain('EPLC')">EPLC</span>
+        <span class="domain-pill pill-peeps" data-domain="PEEPS" onclick="toggleDomain('PEEPS')">PEEPS</span>
         <span class="clear-filter" onclick="clearFilters()">Clear</span>
     </div>
     <p class="section-title" style="margin-top:8px;">Filter By Project</p>
@@ -1176,10 +1227,15 @@
                 <p style="font-size:11px;color:#633806;margin-bottom:6px;">1% Goal</p>
                 <textarea id="plan-mts" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
             </div>
-            <div class="plan-card plan-card-eplc plan-full">
+            <div class="plan-card plan-card-eplc">
                 <p class="plan-label plan-label-eplc">EPLC</p>
                 <p style="font-size:11px;color:#0C447C;margin-bottom:6px;">1% Goal</p>
                 <textarea id="plan-eplc" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
+            </div>
+            <div class="plan-card plan-card-peeps">
+                <p class="plan-label plan-label-peeps">PEEPS</p>
+                <p style="font-size:11px;color:#7A1F52;margin-bottom:6px;">1% Goal</p>
+                <textarea id="plan-peeps" rows="3" placeholder="The smallest move that creates forward momentum…"></textarea>
             </div>
         </div>
         <button class="btn btn-primary btn-full" style="margin-top:4px;" onclick="savePlan()">Save Plan to Notion →</button>
@@ -1191,13 +1247,14 @@
     // CONFIG — FILL IN YOUR VALUES
     // ═══════════════════════════════════════════════════════════
     const GCAL_CLIENT_ID = '435629248291-1upcl99q2u3grdaaa3pfice92bfnkamm.apps.googleusercontent.com';   // ← paste your OAuth client ID (…apps.googleusercontent.com)
-    const GCAL_RCBS_ID = 'renitacbsmith@gmail.com'; // Personal/RCBS calendar ID
-    const GCAL_MTS_ID = 'rs@michouthesolutionist.com'; // MTS calendar ID
+    const GCAL_RCBS_ID = 'renitacbsmith@gmail.com';   // ← paste your RCBS/personal calendar ID (an email address)
+    const GCAL_MTS_ID = 'rs@michouthesolutionist.com';     // ← paste your MTS calendar ID (an email address)
     const DB_PROJECTS = '33110b0375a88054b94bfda7c3e93ddb';   // ← paste your Projects database ID
     const DB_TASKS    = '33110b0375a880c18918ebac71592a35';      // ← paste your Tasks database ID
     const DB_NOTES    = '6340f2b86ac94447a8315f0ba87545e3';      // ← paste your Notes database ID
     const DB_DOMAINS  = '33110b0375a88024b4f2c8e6beaca80e';    // ← paste your Domains database ID
     const DB_TAGS     = '1a39ff9fd10747ad9d418577707c012f';       // ← paste your Global Tags database ID
+    const DB_WEEKLY   = '38910b0375a880128c41df617e778eca';     // ← paste your Weekly Review database ID
     const PROXY = 'https://notion-proxy.renitacbsmith.workers.dev/v1';
     // ═══════════════════════════════════════════════════════════
 
@@ -1221,6 +1278,10 @@
         EPLC: {
             pill: 'pill-eplc',
             color: '#378ADD'
+        },
+        PEEPS: {
+            pill: 'pill-peeps',
+            color: '#D45D9C'
         },
     };
 
@@ -1724,8 +1785,8 @@
             const projName = projId && projectMap[projId] ? projectMap[projId] : '';
             const projPill = projName ? `<span class="pill-project" style="cursor:default;">${projName}</span>` : '';
             return `
-        <div class="task-row" data-domain="${domain}" data-project="${projId || ''}">
-          <div class="task-check"></div>
+        <div class="task-row" data-domain="${domain}" data-project="${projId || ''}" data-page-id="${p.id}">
+          <div class="task-check" onclick="markTaskDone('${p.id}', this)" title="Mark done"></div>
           <div style="flex:1;">
             <p class="task-name">${
 
@@ -1740,8 +1801,8 @@
         overdue.map(p => {
             const domain = getTaskDomain(p) || '?';
             return `
-        <div class="carried-row">
-          <div class="overdue-check"></div>
+        <div class="carried-row" data-page-id="${p.id}">
+          <div class="overdue-check" onclick="markTaskDone('${p.id}', this)" title="Mark done"></div>
           <div style="flex:1;">
             <p class="overdue-name">${
 
@@ -1753,6 +1814,56 @@
 
             ;
         }).join('');
+    }
+
+    // ─── TASK COMPLETION (checkbox → done, with undo) ─────────
+    let _tasksCheckboxKey = null;
+    async function getTasksCheckboxKey() {
+        if (_tasksCheckboxKey) return _tasksCheckboxKey;
+        const res = await fetch(`${PROXY}/databases/${DB_TASKS}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', 'Notion-Version': '2022-06-28' }
+        });
+        if (!res.ok) throw new Error('Tasks schema error ' + res.status);
+        const db = await res.json();
+        for (const [name, prop] of Object.entries(db.properties)) {
+            if (prop.type === 'checkbox') { _tasksCheckboxKey = name; return name; }
+        }
+        throw new Error('No checkbox property found in Tasks database');
+    }
+
+    function bumpTaskMetric(row, delta) {
+        const id = row.classList.contains('carried-row') ? 'metric-overdue' : 'metric-tasks';
+        const el = document.getElementById(id);
+        if (!el) return;
+        const n = parseInt(el.textContent, 10);
+        if (!isNaN(n)) el.textContent = Math.max(0, n + delta);
+    }
+
+    async function markTaskDone(pageId, checkEl) {
+        const row = checkEl.closest('.task-row, .carried-row');
+        if (checkEl.classList.contains('checked')) return; // already done
+        try {
+            const key = await getTasksCheckboxKey();
+            await notionPatch(pageId, { [key]: { checkbox: true } });
+            checkEl.classList.add('checked');
+            if (row) {
+                row.classList.add('task-done');
+                bumpTaskMetric(row, -1);
+                setTimeout(() => { row.style.display = 'none'; }, 320);
+                showUndo('Task completed', async () => {
+                    try {
+                        await notionPatch(pageId, { [key]: { checkbox: false } });
+                        row.style.display = '';
+                        row.classList.remove('task-done');
+                        checkEl.classList.remove('checked');
+                        bumpTaskMetric(row, 1);
+                    } catch (e) { alert('Could not undo: ' + e.message); }
+                });
+            }
+        } catch (e) {
+            alert('Could not complete task: ' + e.message);
+        }
     }
 
     // ─── RENDER NOTES ─────────────────────────────────────────
@@ -2034,67 +2145,141 @@
         return blocks;
     }
 
+    // ─── WEEKLY REVIEW (save + pre-fill, one record per week) ──
+    let _weeklySchema = null;
+    async function getWeeklySchema() {
+        if (_weeklySchema) return _weeklySchema;
+        const res = await fetch(`${PROXY}/databases/${DB_WEEKLY}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', 'Notion-Version': '2022-06-28' }
+        });
+        if (!res.ok) throw new Error('Weekly schema error ' + res.status);
+        _weeklySchema = await res.json();
+        return _weeklySchema;
+    }
+
+    // Match a property by type + all keywords in its name (emoji-proof, name-agnostic)
+    function findProp(schema, type, ...keywords) {
+        for (const [name, prop] of Object.entries(schema.properties)) {
+            if (prop.type !== type) continue;
+            const k = name.toLowerCase();
+            if (keywords.every(kw => k.includes(kw))) return name;
+        }
+        return null;
+    }
+
+    async function weeklyFieldMap() {
+        const s = await getWeeklySchema();
+        return {
+            title:  findProp(s, 'title'),
+            date:   findProp(s, 'date'),
+            needle: findProp(s, 'rich_text', 'needle'),
+            didnt:  findProp(s, 'rich_text', 'work'),
+            carry:  findProp(s, 'rich_text', 'carry'),
+            theme:  findProp(s, 'rich_text', 'intention'),
+            rcbs:   findProp(s, 'rich_text', '1%', 'rcbs'),
+            rws:    findProp(s, 'rich_text', '1%', 'rws'),
+            sm:     findProp(s, 'rich_text', '1%', 'sm'),
+            mts:    findProp(s, 'rich_text', '1%', 'mts'),
+            eplc:   findProp(s, 'rich_text', '1%', 'eplc'),
+            peeps:  findProp(s, 'rich_text', '1%', 'peeps')
+        };
+    }
+
+    function isoDate(d) {
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${d.getFullYear()}-${m}-${day}`;
+    }
+    function rtVal(text) {
+        return { rich_text: text ? [{ text: { content: text } }] : [] };
+    }
+    function rtRead(prop) {
+        return (prop && prop.rich_text ? prop.rich_text : []).map(r => r.plain_text).join('');
+    }
+    function boxVal(id) {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    }
+    function setBox(id, v) {
+        const el = document.getElementById(id);
+        if (el) el.value = v || '';
+    }
+
+    // Finds this week's record (Week Ending = the week-ending Saturday); creates it only when asked.
+    async function getOrCreateWeek(f, create) {
+        const weekISO = isoDate(DATES.weekEnd);
+        const records = await notionQuery(DB_WEEKLY, null);
+        const rec = records.find(r => {
+            const d = f.date && r.properties[f.date]?.date?.start;
+            return d && d.slice(0, 10) === weekISO;
+        });
+        if (rec || !create) return rec || null;
+        const props = {};
+        if (f.title) props[f.title] = { title: [{ text: { content: 'Week ending ' + formatDate(DATES.weekEnd) + ', ' + DATES.weekEnd.getFullYear() } }] };
+        if (f.date) props[f.date] = { date: { start: weekISO } };
+        return await notionCreate(DB_WEEKLY, props);
+    }
+
     async function saveReflection() {
-        const needle = document.getElementById('ref-needle').value.trim();
-        const didnt = document.getElementById('ref-didnt').value.trim();
-        const carry = document.getElementById('ref-carry').value.trim();
+        const needle = boxVal('ref-needle'), didnt = boxVal('ref-didnt'), carry = boxVal('ref-carry');
         if (!needle && !didnt && !carry) {
             alert('Add at least one reflection before saving.');
             return;
         }
         try {
-            const titleKey = await getNotesTitleKey();
-            const blocks = buildBlocks([
-                ['What moved the needle?', needle],
-                ["What didn't work?", didnt],
-                ['Carrying into next week', carry]
-            ]);
-            await notionCreate(DB_NOTES, {
-                [titleKey]: {
-                    title: [{
-                        text: {
-                            content: 'Weekly Reflection — ' + formatDate(DATES.weekEnd)
-                        }
-                    }]
-                }
-            }, blocks);
-            alert('Reflection saved to Notion!');
+            const f = await weeklyFieldMap();
+            const rec = await getOrCreateWeek(f, true);
+            const props = {};
+            if (f.needle) props[f.needle] = rtVal(needle);
+            if (f.didnt) props[f.didnt] = rtVal(didnt);
+            if (f.carry) props[f.carry] = rtVal(carry);
+            await notionPatch(rec.id, props);
+            alert("Reflection saved to this week's record.");
         } catch (e) {
             console.error(e);
             alert('Could not save: ' + e.message);
         }
     }
 
-    // ─── SAVE PLAN ────────────────────────────────────────────
     async function savePlan() {
-        const theme = document.getElementById('plan-theme').value.trim();
-        const goals = ['rcbs', 'rws', 'sm', 'mts', 'eplc'].map(d => {
-            const v = document.getElementById('plan-' + d).value.trim();
-            return v ? `${d.toUpperCase()}: ${v}` : null;
-        }).filter(Boolean).join('\n');
-        if (!theme && !goals) {
-            alert('Add at least one goal before saving.');
+        const theme = boxVal('plan-theme');
+        const goals = {
+            rcbs: boxVal('plan-rcbs'), rws: boxVal('plan-rws'), sm: boxVal('plan-sm'),
+            mts: boxVal('plan-mts'), eplc: boxVal('plan-eplc'), peeps: boxVal('plan-peeps')
+        };
+        if (!theme && !Object.values(goals).some(Boolean)) {
+            alert('Add a theme or at least one goal before saving.');
             return;
         }
         try {
-            const titleKey = await getNotesTitleKey();
-            const blocks = buildBlocks([
-                ['Overall theme', theme],
-                ['1% Goals', goals]
-            ]);
-            await notionCreate(DB_NOTES, {
-                [titleKey]: {
-                    title: [{
-                        text: {
-                            content: 'Plan Ahead — ' + formatDate(DATES.w1s) + ' to ' + formatDate(DATES.w2e)
-                        }
-                    }]
-                }
-            }, blocks);
-            alert('Plan saved to Notion!');
+            const f = await weeklyFieldMap();
+            const rec = await getOrCreateWeek(f, true);
+            const props = {};
+            if (f.theme) props[f.theme] = rtVal(theme);
+            Object.keys(goals).forEach(d => { if (f[d]) props[f[d]] = rtVal(goals[d]); });
+            await notionPatch(rec.id, props);
+            alert("Plan saved to this week's record.");
         } catch (e) {
             console.error(e);
             alert('Could not save: ' + e.message);
+        }
+    }
+
+    // Pre-fill reflection/plan boxes from this week's record if it already exists.
+    async function prefillWeekly() {
+        try {
+            const f = await weeklyFieldMap();
+            const rec = await getOrCreateWeek(f, false);
+            if (!rec) return;
+            const read = key => f[key] ? rtRead(rec.properties[f[key]]) : '';
+            setBox('ref-needle', read('needle'));
+            setBox('ref-didnt', read('didnt'));
+            setBox('ref-carry', read('carry'));
+            setBox('plan-theme', read('theme'));
+            ['rcbs', 'rws', 'sm', 'mts', 'eplc', 'peeps'].forEach(d => setBox('plan-' + d, read(d)));
+        } catch (e) {
+            console.warn('Weekly pre-fill skipped:', e.message);
         }
     }
 
@@ -2268,6 +2453,7 @@
             try { await loadTags(); } catch (e) { console.warn('Tags unavailable for note pills:', e.message); }
             renderNotes(inbox);
             renderTagPulse(notes);
+            prefillWeekly();
         } catch (e) {
             console.error(e);
             ['projects-list', 'tasks-list', 'notes-list', 'overdue-list'].forEach(id => {

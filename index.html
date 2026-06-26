@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly Review — Renita Smith</title>
+    <title>RenitaOS Weekly Review — Renita Smith</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -129,6 +129,8 @@
     .metric-label {
         font-size: 11px;
         color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         margin-bottom: 4px;
     }
 
@@ -187,11 +189,15 @@
     .act-title {
         font-size: 18px;
         font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
 
     .act-sub {
         font-size: 12px;
         color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
 
     .act-review .act-num {
@@ -242,7 +248,7 @@
         font-size: 12px;
         font-weight: 500;
         padding: 3px 10px;
-        border-radius: 20px;
+        border-radius: 6px;
         cursor: pointer;
         border: 1.5px solid transparent;
         transition: all 0.15s;
@@ -289,7 +295,7 @@
         color: #444;
         font-size: 11px;
         padding: 2px 8px;
-        border-radius: 20px;
+        border-radius: 6px;
         border: 1.5px solid transparent;
         cursor: pointer;
         display: inline-flex;
@@ -340,7 +346,7 @@
         font-size: 12px;
         font-weight: 500;
         padding: 3px 12px;
-        border-radius: 20px;
+        border-radius: 6px;
         cursor: pointer;
         border: 1.5px solid #ccc;
         background: #fff;
@@ -822,6 +828,28 @@
         pointer-events: none;
     }
 
+    .attn-group {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #999;
+        margin: 16px 0 4px;
+    }
+    .attn-group:first-child {
+        margin-top: 0;
+    }
+    .attn-overdue .task-name {
+        color: #a32d2d;
+    }
+    .attn-overdue .task-check {
+        border-color: #a32d2d;
+    }
+    .review-selected {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+    }
+
     .reflect-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -971,6 +999,8 @@
     .jump-btn {
         font-size: 16px;
         font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         padding: 10px 22px;
         border-radius: 8px;
         border: 0.5px solid #ccc;
@@ -1097,7 +1127,7 @@
 
     <div class="header-row">
         <div>
-            <h1>Weekly Review</h1>
+            <h1>RenitaOS Weekly Review</h1>
             <p class="subtitle" id="weekLabel">Loading dates…</p>
         </div>
         <div class="header-btns">
@@ -1115,19 +1145,19 @@
 
     <div class="grid-5" style="grid-template-columns:repeat(4,1fr);">
         <div class="metric">
-            <p class="metric-label">Active projects</p>
+            <p class="metric-label">Active Projects</p>
             <p class="metric-value" id="metric-projects">—</p>
         </div>
         <div class="metric">
-            <p class="metric-label">Tasks · next 2 wks</p>
+            <p class="metric-label">Tasks Due This Week</p>
             <p class="metric-value" id="metric-tasks">—</p>
         </div>
         <div class="metric">
-            <p class="metric-label">Overdue tasks</p>
+            <p class="metric-label">Overdue Tasks</p>
             <p class="metric-value danger" id="metric-overdue">—</p>
         </div>
         <div class="metric">
-            <p class="metric-label">Unprocessed notes</p>
+            <p class="metric-label">Notes to be Filed</p>
             <p class="metric-value" id="metric-notes">—</p>
         </div>
     </div>
@@ -1135,8 +1165,8 @@
     <div class="snapshot-divider"></div>
 
     <section id="act-review" class="act act-review">
-        <div class="act-header"><span class="act-num">1</span><span class="act-title">Review</span><span class="act-sub">— look back at the week ending</span></div>
-    <p class="section-title">Last Week's Goals &amp; Intention</p>
+        <div class="act-header"><span class="act-num">1</span><span class="act-title">Review</span><span class="act-sub">— Look Back Over This Week</span></div>
+    <p class="section-title">This Week's Goals &amp; Intentions</p>
     <div class="card" id="lastweek-review" style="margin-bottom:1.5rem;">
         <p class="loading">Loading last week's review…</p>
     </div>
@@ -1150,7 +1180,7 @@
         </div>
     </div>
 
-    <p class="section-title">Week in Review — Calendar</p>
+    <p class="section-title">Calendar — This Week</p>
     <div class="card" style="margin-bottom:1.5rem;">
         <p class="week-divider" id="calReviewLabel">This week</p>
         <div class="cal-week" id="cal-review">
@@ -1177,7 +1207,7 @@
                 </div>
             </div>
             <div id="sec-undone">
-                <p class="section-title">What Didn't Get Done</p>
+                <p class="section-title">Tasks Needing Attention</p>
                 <div class="card" id="overdue-list">
                     <p class="loading">Loading overdue tasks…</p>
                 </div>
@@ -1185,7 +1215,7 @@
         </div>
 
     <div id="sec-inbox">
-        <p class="section-title">Note Inbox — Process &amp; Assign <span id="inbox-count" class="inbox-count"></span></p>
+        <p class="section-title">Note Station — Process &amp; Assign <span id="inbox-count" class="inbox-count"></span></p>
         <div class="inbox-filter">
             <button class="seg" data-filter="ALL" onclick="setInboxFilter('ALL', this)">All</button>
             <button class="seg active" data-filter="INBOX" onclick="setInboxFilter('INBOX', this)">Inbox</button>
@@ -1196,7 +1226,7 @@
         </div>
     </div>
 
-    <p class="section-title" id="sec-tags">Tag Pulse — Common Tags</p>
+    <p class="section-title" id="sec-tags">Tag Station — Look for Patterns</p>
     <div class="inbox-filter" id="tag-filter">
         <button class="seg active" data-window="thisweek" onclick="setTagWindow('thisweek', this)">This Week</button>
         <button class="seg" data-window="lastweek" onclick="setTagWindow('lastweek', this)">Last Week</button>
@@ -1206,7 +1236,7 @@
     </section>
 
     <section id="act-reflect" class="act act-reflect">
-        <div class="act-header"><span class="act-num">2</span><span class="act-title">Reflect</span><span class="act-sub">— make sense of it</span></div>
+        <div class="act-header"><span class="act-num">2</span><span class="act-title">Reflect</span><span class="act-sub">— Sit With It All For A Moment</span></div>
     <div id="sec-reflection">
         <p class="section-title">Weekly Reflection</p>
         <div class="card" style="margin-bottom:1.5rem;">
@@ -1230,8 +1260,8 @@
     </section>
 
     <section id="act-plan" class="act act-plan">
-        <div class="act-header"><span class="act-num">3</span><span class="act-title">Plan</span><span class="act-sub">— look forward two weeks</span></div>
-    <p class="section-title">Domain Load — Ahead</p>
+        <div class="act-header"><span class="act-num">3</span><span class="act-title">Plan</span><span class="act-sub">— Look Ahead to the Next Weeks</span></div>
+    <p class="section-title">Domain Load — Two Week Outlook</p>
     <div class="card" style="margin-bottom:1.5rem;">
         <div id="dist-plan-pills" class="filter-bar" style="margin-bottom:10px;">
             <span class="time-pill active" data-window="nextweek" onclick="toggleTime(this)">Next Week</span>
@@ -1244,7 +1274,7 @@
             <span class="loading">Loading domain data…</span>
         </div>
     </div>
-    <p class="section-title">Two-Week Outlook — Calendar</p>
+    <p class="section-title">Calendar — Two Week Outlook</p>
     <div class="card" style="margin-bottom:1.5rem;">
         <p class="week-divider" id="week1Label">Week 1</p>
         <div class="cal-week" id="cal-week1">
@@ -1934,8 +1964,9 @@
         const star = withStar
             ? `<span class="star ${starred ? 'star-on' : 'star-off'}" onclick="togglePriority('${p.id}', this)">${starred ? '★' : '☆'}</span>`
             : '';
+        const reviewClick = withStar ? '' : ` onclick="toggleReviewProject('${p.id}', this)" style="cursor:pointer;" title="Filter Tasks Needing Attention by this project"`;
         return `
-      <div class="project-row" data-domain="${domain}" data-project="${p.id}">
+      <div class="project-row" data-domain="${domain}" data-project="${p.id}"${reviewClick}>
         ${star}<span class="project-name">${getTitle(p)}</span>
         ${pillHtml(domain, true)}
       </div>
@@ -2062,64 +2093,62 @@
     }
 
     // ─── RENDER TASKS ─────────────────────────────────────────
-    function renderTasks(pages, projectMap) {
-        const list = document.getElementById('tasks-list');
-        const overdEl = document.getElementById('overdue-list');
-        const now = new Date();
-        const twoWks = new Date();
-        twoWks.setDate(now.getDate() + 14);
-        const upcoming = pages.filter(p => {
-            const d = getDueDate(p);
-            return d && d >= now && d <= twoWks;
-        });
-        const overdue = pages.filter(p => {
-            const d = getDueDate(p);
-            return d && d < now;
-        });
-        document.getElementById('metric-tasks').textContent = upcoming.length;
-        document.getElementById('metric-overdue').textContent = overdue.length;
-        list.innerHTML = !upcoming.length ? '<p class="empty">No tasks due in the next two weeks</p>' :
-        upcoming.map(p => {
-            const domain = getTaskDomain(p) || '?';
-            const due = getDueDate(p);
-            const dateStr = due ? due.toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric'
-            }) : '';
-            const projId = getTaskProjectId(p);
-            const projName = projId && projectMap[projId] ? projectMap[projId] : '';
-            const projPill = projName ? `<span class="pill-project" style="cursor:default;">${projName}</span>` : '';
-            return `
-        <div class="task-row" data-domain="${domain}" data-project="${projId || ''}" data-page-id="${p.id}">
+    function taskRowHtml(p, projectMap, kind) {
+        const domain = getTaskDomain(p) || '?';
+        const due = getDueDate(p);
+        const dateStr = due ? due.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+        const projId = getTaskProjectId(p);
+        const projName = projId && projectMap[projId] ? projectMap[projId] : '';
+        const projPill = projName ? `<span class="pill-project" style="cursor:default;">${projName}</span>` : '';
+        const cls = kind === 'overdue' ? 'task-row carried-row attn-overdue' : 'task-row';
+        const prefix = kind === 'overdue' ? 'Overdue · ' : (kind === 'due' ? 'Due ' : '');
+        return `
+        <div class="${cls}" data-domain="${domain}" data-project="${projId || ''}" data-page-id="${p.id}">
           <div class="task-check" onclick="markTaskDone('${p.id}', this)" title="Mark done"></div>
           <div style="flex:1;">
-            <p class="task-name">${
-
-            getTitle(p)}</p>
-            <p class="task-meta">${dateStr} · ${pillHtml(domain, true)}${projPill}</p>
+            <p class="task-name">${getTitle(p)}</p>
+            <p class="task-meta">${prefix}${dateStr}${dateStr ? ' · ' : ''}${pillHtml(domain, true)}${projPill}</p>
           </div>
-        </div>`
+        </div>`;
+    }
 
-            ;
-        }).join('');
-        overdEl.innerHTML = !overdue.length ? '<p class="empty">Nothing carried over — nice work.</p>' :
-        overdue.map(p => {
-            const domain = getTaskDomain(p) || '?';
-            return `
-        <div class="carried-row" data-page-id="${p.id}">
-          <div class="overdue-check" onclick="markTaskDone('${p.id}', this)" title="Mark done"></div>
-          <div style="flex:1;">
-            <p class="overdue-name">${
+    function renderTasks(pages, projectMap) {
+        const list = document.getElementById('tasks-list');
+        const attnEl = document.getElementById('overdue-list');
+        const now = new Date();
+        const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+        const weekEndSat = new Date(DATES.weekEnd); weekEndSat.setHours(23, 59, 59, 999);
+        const twoWks = new Date(); twoWks.setDate(now.getDate() + 14);
 
+        const upcoming = pages.filter(p => { const d = getDueDate(p); return d && d >= now && d <= twoWks; });
+        const dueThisWeek = pages.filter(p => { const d = getDueDate(p); return d && d >= startToday && d <= weekEndSat; });
+        const overdue = pages.filter(p => { const d = getDueDate(p); return d && d < startToday; });
 
-            getTitle(p)}</p>
-            <p class="overdue-sub">Overdue · ${pillHtml(domain, true)}</p>
-          </div>
-        </div>`
+        document.getElementById('metric-tasks').textContent = dueThisWeek.length;
+        document.getElementById('metric-overdue').textContent = overdue.length;
 
-            ;
-        }).join('');
+        list.innerHTML = !upcoming.length ? '<p class="empty">No tasks due in the next two weeks</p>' :
+            upcoming.map(p => taskRowHtml(p, projectMap, 'plan')).join('');
+
+        const group = (label, arr, kind) =>
+            arr.length ? `<p class="attn-group">${label}</p>` + arr.map(p => taskRowHtml(p, projectMap, kind)).join('') : '';
+        const attnHtml = group('Due This Week', dueThisWeek, 'due') + group('Overdue', overdue, 'overdue');
+        attnEl.innerHTML = attnHtml || '<p class="empty">Nothing needs attention — nice work.</p>';
+        filterReviewTasks();
+    }
+
+    let activeReviewProject = null;
+    function toggleReviewProject(id, el) {
+        activeReviewProject = activeReviewProject === id ? null : id;
+        document.querySelectorAll('#projects-list-review .project-row').forEach(r =>
+            r.classList.toggle('review-selected', r.dataset.project === activeReviewProject));
+        filterReviewTasks();
+    }
+    function filterReviewTasks() {
+        document.querySelectorAll('#overdue-list .task-row').forEach(row => {
+            const show = !activeReviewProject || row.dataset.project === activeReviewProject;
+            row.classList.toggle('hidden', !show);
+        });
     }
 
     // ─── TASK COMPLETION (checkbox → done, with undo) ─────────

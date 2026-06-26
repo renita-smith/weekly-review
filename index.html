@@ -824,8 +824,8 @@
 
     .reflect-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 12px;
+        grid-template-columns: 1fr;
+        gap: 14px;
         margin-bottom: 12px;
     }
 
@@ -969,9 +969,10 @@
     }
 
     .jump-btn {
-        font-size: 12px;
-        padding: 5px 14px;
-        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 9px 20px;
+        border-radius: 8px;
         border: 0.5px solid #ccc;
         background: #fff;
         cursor: pointer;
@@ -1135,14 +1136,7 @@
 
     <section id="act-review" class="act act-review">
         <div class="act-header"><span class="act-num">1</span><span class="act-title">Review</span><span class="act-sub">— look back at the week ending</span></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <p class="section-title" style="margin:0;">Domains</p>
-        <div class="filter-bar" style="margin:0;">
-            <span class="time-pill active" onclick="toggleTime(this)">This Week</span>
-            <span class="time-pill" onclick="toggleTime(this)">Next Week</span>
-            <span class="time-pill" onclick="toggleTime(this)">Next Two Weeks</span>
-        </div>
-    </div>
+    <p class="section-title">Domain Load — This Week</p>
     <div class="card" style="margin-bottom:1.5rem;">
         <div class="dist-bar-wrap" id="dist-bar">
             <div class="dist-seg" style="width:100%;background:#eee;"></div>
@@ -1150,6 +1144,11 @@
         <div class="dist-legend" id="dist-legend">
             <span class="loading">Loading domain data…</span>
         </div>
+    </div>
+
+    <p class="section-title">Active Projects</p>
+    <div class="card" id="projects-list-review" style="margin-bottom:1.5rem;">
+        <p class="loading">Loading projects…</p>
     </div>
 
         <div id="sec-undone">
@@ -1214,6 +1213,19 @@
 
     <section id="act-plan" class="act act-plan">
         <div class="act-header"><span class="act-num">3</span><span class="act-title">Plan</span><span class="act-sub">— look forward two weeks</span></div>
+    <p class="section-title">Domain Load — Ahead</p>
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div id="dist-plan-pills" class="filter-bar" style="margin-bottom:10px;">
+            <span class="time-pill active" data-window="nextweek" onclick="toggleTime(this)">Next Week</span>
+            <span class="time-pill" data-window="nexttwo" onclick="toggleTime(this)">Next Two Weeks</span>
+        </div>
+        <div class="dist-bar-wrap" id="dist-bar-plan">
+            <div class="dist-seg" style="width:100%;background:#eee;"></div>
+        </div>
+        <div class="dist-legend" id="dist-legend-plan">
+            <span class="loading">Loading domain data…</span>
+        </div>
+    </div>
     <p class="section-title">Filter By Domain</p>
     <div class="filter-bar" id="filterBar" style="margin-bottom:6px;">
         <span class="domain-pill pill-rcbs" data-domain="RCBS" onclick="toggleDomain('RCBS')">RCBS</span>
@@ -1782,7 +1794,7 @@
     let activeDomain = null,
         activeProject = null;
     function applyFilters() {
-        document.querySelectorAll('.project-row[data-domain]').forEach(row => {
+        document.querySelectorAll('#projects-list .project-row[data-domain]').forEach(row => {
             const show = (!activeDomain || row.dataset.domain === activeDomain) &&
             (!activeProject || row.dataset.project === activeProject);
             row.classList.toggle('hidden', !show);
@@ -1790,7 +1802,7 @@
             if(next?.classList.contains('progress-wrap'))
                 next.classList.toggle('hidden', !show);
         });
-        document.querySelectorAll('.task-row[data-domain]').forEach(row => {
+        document.querySelectorAll('#tasks-list .task-row[data-domain]').forEach(row => {
             const show = (!activeDomain || row.dataset.domain === activeDomain) &&
             (!activeProject || row.dataset.project === activeProject);
             row.classList.toggle('hidden', !show);
@@ -1816,61 +1828,130 @@
         document.querySelectorAll('#filterBar .domain-pill').forEach(p =>
         p.classList.remove('pill-active-rcbs', 'pill-active-rws', 'pill-active-sm', 'pill-active-mts', 'pill-active-eplc'));
         document.querySelectorAll('#projectBar .pill-project').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.project-row[data-domain],.task-row[data-domain],.progress-wrap').forEach(r => r.classList.remove('hidden'));
+        document.querySelectorAll('#projects-list .project-row[data-domain],#tasks-list .task-row[data-domain],#projects-list .progress-wrap').forEach(r => r.classList.remove('hidden'));
     }
-    function toggleStar(el) {
-        const on = el.classList.contains('star-on');
-        el.classList.toggle('star-on', !on);
-        el.classList.toggle('star-off', on);
-        el.textContent = on ? '☆' : '★';
+    let _allTasks = [];
+    let _planWindow = 'nextweek';
+    let _projectsCheckboxKey = null;
+    async function getProjectsCheckboxKey() {
+        if (_projectsCheckboxKey) return _projectsCheckboxKey;
+        const res = await fetch(`${PROXY}/databases/${DB_PROJECTS}`, {
+            headers: { 'Notion-Version': '2022-06-28' }
+        });
+        if (!res.ok) throw new Error('Projects schema error ' + res.status);
+        const db = await res.json();
+        for (const [name, prop] of Object.entries(db.properties)) {
+            if (prop.type === 'checkbox') { _projectsCheckboxKey = name; return name; }
+        }
+        throw new Error('No checkbox property in Projects DB');
+    }
+    function getPriority(page) {
+        for (const key of Object.keys(page.properties)) {
+            if (page.properties[key].type === 'checkbox')
+                return !!page.properties[key].checkbox;
+        }
+        return false;
+    }
+    async function togglePriority(pageId, el) {
+        const wasOn = el.classList.contains('star-on');
+        const next = !wasOn;
+        el.classList.toggle('star-on', next);
+        el.classList.toggle('star-off', !next);
+        el.textContent = next ? '★' : '☆';
+        try {
+            const key = await getProjectsCheckboxKey();
+            await notionPatch(pageId, { [key]: { checkbox: next } });
+        } catch (e) {
+            el.classList.toggle('star-on', wasOn);
+            el.classList.toggle('star-off', !wasOn);
+            el.textContent = wasOn ? '★' : '☆';
+            alert('Could not update priority: ' + e.message);
+        }
     }
     function toggleTime(el) {
-        document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('#dist-plan-pills .time-pill').forEach(p => p.classList.remove('active'));
         el.classList.add('active');
+        _planWindow = el.dataset.window || 'nextweek';
+        renderPlanDist();
     }
 
     // ─── RENDER PROJECTS ──────────────────────────────────────
-    function renderProjects(pages) {
-        const list = document.getElementById('projects-list');
-        const bar = document.getElementById('projectBar');
-        if (!pages.length) {
-            list.innerHTML = '<p class="empty">No active projects found</p>';
-            bar.innerHTML = '';
-            return;
-        }
-        const domainCount = {};
-        pages.forEach(p => {
-            const d = getProjectDomain(p);
-            if (d)
-                domainCount[d] = (domainCount[d] || 0) + 1;
-        });
-        const total = pages.length;
-        document.getElementById('dist-bar').innerHTML = Object.entries(domainCount).map(([d, c]) =>
-        `<div class="dist-seg" style="width:${Math.round(c / total * 100)}%;background:${domainColor(d)};"></div>`).join('') ||
-        '<div class="dist-seg" style="width:100%;background:#eee;"></div>';
-        document.getElementById('dist-legend').innerHTML = Object.entries(domainCount).map(([d, c]) =>
-        `<div class="dist-item"><div class="dist-dot" style="background:${domainColor(d)};"></div>${d} ${Math.round(c / total * 100)}%</div>`).join('');
-        bar.innerHTML = pages.map(p =>
-        `<span class="pill-project" data-project="${p.id}" onclick="toggleProject('${p.id}')">${getTitle(p)}</span>`
-        ).join('') + `<span class="clear-filter" onclick="clearFilters()">Clear</span>`;
-        list.innerHTML = pages.map(p => {
-            const domain = getProjectDomain(p) || '?';
-            const prog = getProgress(p);
-            return `
+    function projectRowHtml(p, withStar) {
+        const domain = getProjectDomain(p) || '?';
+        const prog = getProgress(p);
+        const starred = getPriority(p);
+        const star = withStar
+            ? `<span class="star ${starred ? 'star-on' : 'star-off'}" onclick="togglePriority('${p.id}', this)">${starred ? '★' : '☆'}</span>`
+            : '';
+        return `
       <div class="project-row" data-domain="${domain}" data-project="${p.id}">
-        <span class="star star-off" onclick="toggleStar(this)">☆</span>
-        <span class="project-name">${
-            getTitle(p)}</span>
+        ${star}<span class="project-name">${getTitle(p)}</span>
         ${pillHtml(domain, true)}
       </div>
       <div class="progress-wrap">
-        <div class="progress-bar"><div class="progress-fill" style="width:${
-
-            prog}%;background:${domainColor(domain)};"></div></div>
-      </div>`
-            ;
-        }).join('');
+        <div class="progress-bar"><div class="progress-fill" style="width:${prog}%;background:${domainColor(domain)};"></div></div>
+      </div>`;
+    }
+    function renderProjects(pages) {
+        const planList = document.getElementById('projects-list');
+        const reviewList = document.getElementById('projects-list-review');
+        const bar = document.getElementById('projectBar');
         document.getElementById('metric-projects').textContent = pages.length;
+        if (!pages.length) {
+            if (planList) planList.innerHTML = '<p class="empty">No active projects found</p>';
+            if (reviewList) reviewList.innerHTML = '<p class="empty">No active projects found</p>';
+            if (bar) bar.innerHTML = '';
+            return;
+        }
+        if (bar) bar.innerHTML = pages.map(p =>
+            `<span class="pill-project" data-project="${p.id}" onclick="toggleProject('${p.id}')">${getTitle(p)}</span>`
+        ).join('') + `<span class="clear-filter" onclick="clearFilters()">Clear</span>`;
+        if (planList) planList.innerHTML = pages.map(p => projectRowHtml(p, true)).join('');
+        if (reviewList) reviewList.innerHTML = pages.map(p => projectRowHtml(p, false)).join('');
+    }
+
+    // ─── RENDER DOMAIN LOAD (tasks due in window, grouped by domain) ───
+    function distWindows() {
+        const we = DATES.weekEnd;
+        const tws = new Date(we); tws.setDate(we.getDate() - 6); tws.setHours(0, 0, 0, 0);
+        const twe = new Date(we); twe.setHours(23, 59, 59, 999);
+        const nws = new Date(DATES.w1s); nws.setHours(0, 0, 0, 0);
+        const nwe = new Date(DATES.w1e); nwe.setHours(23, 59, 59, 999);
+        const n2e = new Date(DATES.w2e); n2e.setHours(23, 59, 59, 999);
+        return { thisweek: [tws, twe], nextweek: [nws, nwe], nexttwo: [nws, n2e] };
+    }
+    function renderDomainLoad(tasks, start, end, barId, legendId) {
+        const bar = document.getElementById(barId);
+        const legend = document.getElementById(legendId);
+        if (!bar || !legend) return;
+        const counts = {};
+        let total = 0;
+        (tasks || []).forEach(t => {
+            const due = getDueDate(t);
+            if (due && due >= start && due <= end) {
+                const d = getTaskDomain(t) || '?';
+                counts[d] = (counts[d] || 0) + 1;
+                total++;
+            }
+        });
+        if (!total) {
+            bar.innerHTML = '<div class="dist-seg" style="width:100%;background:#eee;"></div>';
+            legend.innerHTML = '<span class="empty" style="font-size:12px;">No tasks due in this window.</span>';
+            return;
+        }
+        bar.innerHTML = Object.entries(counts).map(([d, c]) =>
+            `<div class="dist-seg" style="width:${Math.round(c / total * 100)}%;background:${domainColor(d)};"></div>`).join('');
+        legend.innerHTML = Object.entries(counts).map(([d, c]) =>
+            `<div class="dist-item"><div class="dist-dot" style="background:${domainColor(d)};"></div>${d} ${c} · ${Math.round(c / total * 100)}%</div>`).join('');
+    }
+    function renderReviewDist() {
+        const w = distWindows();
+        renderDomainLoad(_allTasks, w.thisweek[0], w.thisweek[1], 'dist-bar', 'dist-legend');
+    }
+    function renderPlanDist() {
+        const w = distWindows();
+        const win = _planWindow === 'nexttwo' ? w.nexttwo : w.nextweek;
+        renderDomainLoad(_allTasks, win[0], win[1], 'dist-bar-plan', 'dist-legend-plan');
     }
 
     // ─── RENDER TASKS ─────────────────────────────────────────
@@ -2424,17 +2505,14 @@
 
     // ─── RESET ────────────────────────────────────────────────
     function hardReset() {
-        if (!confirm('Reset the dashboard? This will clear all stars, filters, and text fields.'))
+        if (!confirm('Reset filters, the window selector, and all text fields? (Your priority stars stay — they live in Notion now.)'))
             return;
         clearFilters();
-        document.querySelectorAll('.star').forEach(s => {
-            s.classList.remove('star-on');
-            s.classList.add('star-off');
-            s.textContent = '☆';
-        });
         document.querySelectorAll('textarea').forEach(t => t.value = '');
         document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-        document.querySelectorAll('.time-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
+        document.querySelectorAll('#dist-plan-pills .time-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
+        _planWindow = 'nextweek';
+        renderPlanDist();
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
@@ -2585,6 +2663,9 @@
             });
             renderProjects(projects);
             renderTasks(tasks, projectMap);
+            _allTasks = tasks;
+            renderReviewDist();
+            renderPlanDist();
             const inbox = notes.filter(p => {
                 const s = (getStatus(p) || '').toUpperCase();
                 return s === 'INBOX' || s === 'ACTIVE';

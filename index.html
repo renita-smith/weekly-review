@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Review — Renita Smith</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
     <style>
     * {
         box-sizing: border-box;
@@ -13,7 +16,7 @@
     }
 
     body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         background: #f5f4f0;
         color: #1a1a1a;
         padding: 2rem;
@@ -116,18 +119,23 @@
     .metric {
         background: #f0efe9;
         border-radius: 8px;
-        padding: 0.75rem 1rem;
+        padding: 1.1rem 1.1rem 1.2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 88px;
     }
 
     .metric-label {
         font-size: 11px;
         color: #888;
-        margin-bottom: 2px;
+        margin-bottom: 4px;
     }
 
     .metric-value {
-        font-size: 22px;
-        font-weight: 500;
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1.1;
     }
 
     .metric-value.danger {

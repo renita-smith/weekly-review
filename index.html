@@ -969,9 +969,9 @@
     }
 
     .jump-btn {
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 500;
-        padding: 9px 20px;
+        padding: 10px 22px;
         border-radius: 8px;
         border: 0.5px solid #ccc;
         background: #fff;
@@ -1108,9 +1108,9 @@
     </div>
 
     <div class="jump-bar">
-        <button class="jump-btn" onclick="document.getElementById('act-review').scrollIntoView({behavior:'smooth'})">① Review</button>
-        <button class="jump-btn" onclick="document.getElementById('act-reflect').scrollIntoView({behavior:'smooth'})">② Reflect</button>
-        <button class="jump-btn" onclick="document.getElementById('act-plan').scrollIntoView({behavior:'smooth'})">③ Plan</button>
+        <button class="jump-btn" onclick="document.getElementById('act-review').scrollIntoView({behavior:'smooth'})">Review</button>
+        <button class="jump-btn" onclick="document.getElementById('act-reflect').scrollIntoView({behavior:'smooth'})">Reflect</button>
+        <button class="jump-btn" onclick="document.getElementById('act-plan').scrollIntoView({behavior:'smooth'})">Plan</button>
     </div>
 
     <div class="grid-5" style="grid-template-columns:repeat(4,1fr);">
@@ -1136,6 +1136,10 @@
 
     <section id="act-review" class="act act-review">
         <div class="act-header"><span class="act-num">1</span><span class="act-title">Review</span><span class="act-sub">— look back at the week ending</span></div>
+    <p class="section-title">Last Week's Goals &amp; Intention</p>
+    <div class="card" id="lastweek-review" style="margin-bottom:1.5rem;">
+        <p class="loading">Loading last week's review…</p>
+    </div>
     <p class="section-title">Domain Load — This Week</p>
     <div class="card" style="margin-bottom:1.5rem;">
         <div class="dist-bar-wrap" id="dist-bar">
@@ -1146,15 +1150,37 @@
         </div>
     </div>
 
+    <p class="section-title">Week in Review — Calendar</p>
+    <div class="card" style="margin-bottom:1.5rem;">
+        <p class="week-divider" id="calReviewLabel">This week</p>
+        <div class="cal-week" id="cal-review">
+            <div class="cal-day"><p class="cal-day-label">Sun</p><div class="cal-events"></div></div>
+            <div class="cal-day"><p class="cal-day-label">Mon</p><div class="cal-events"></div></div>
+            <div class="cal-day"><p class="cal-day-label">Tue</p><div class="cal-events"></div></div>
+            <div class="cal-day"><p class="cal-day-label">Wed</p><div class="cal-events"></div></div>
+            <div class="cal-day"><p class="cal-day-label">Thu</p><div class="cal-events"></div></div>
+            <div class="cal-day"><p class="cal-day-label">Fri</p><div class="cal-events"></div></div>
+            <div class="cal-day"><p class="cal-day-label">Sat</p><div class="cal-events"></div></div>
+        </div>
+    </div>
+
     <p class="section-title">Active Projects</p>
     <div class="card" id="projects-list-review" style="margin-bottom:1.5rem;">
         <p class="loading">Loading projects…</p>
     </div>
 
-        <div id="sec-undone">
-            <p class="section-title">What Didn't Get Done</p>
-            <div class="card" id="overdue-list">
-                <p class="loading">Loading overdue tasks…</p>
+        <div class="grid-2">
+            <div id="sec-completed">
+                <p class="section-title">Completed This Week</p>
+                <div class="card" id="completed-list">
+                    <p class="loading">Loading completed tasks…</p>
+                </div>
+            </div>
+            <div id="sec-undone">
+                <p class="section-title">What Didn't Get Done</p>
+                <div class="card" id="overdue-list">
+                    <p class="loading">Loading overdue tasks…</p>
+                </div>
             </div>
         </div>
 
@@ -1171,20 +1197,12 @@
     </div>
 
     <p class="section-title" id="sec-tags">Tag Pulse — Common Tags</p>
-    <div class="grid-3">
-        <div>
-            <p class="tag-window-label">This Week</p>
-            <div class="card" id="tags-thisweek"><p class="loading">Loading tags…</p></div>
-        </div>
-        <div>
-            <p class="tag-window-label">Last Week</p>
-            <div class="card" id="tags-lastweek"><p class="loading">Loading tags…</p></div>
-        </div>
-        <div>
-            <p class="tag-window-label">This Month</p>
-            <div class="card" id="tags-thismonth"><p class="loading">Loading tags…</p></div>
-        </div>
+    <div class="inbox-filter" id="tag-filter">
+        <button class="seg active" data-window="thisweek" onclick="setTagWindow('thisweek', this)">This Week</button>
+        <button class="seg" data-window="lastweek" onclick="setTagWindow('lastweek', this)">Last Week</button>
+        <button class="seg" data-window="thismonth" onclick="setTagWindow('thismonth', this)">This Month</button>
     </div>
+    <div class="card" id="tags-list" style="margin-bottom:1.5rem;"><p class="loading">Loading tags…</p></div>
     </section>
 
     <section id="act-reflect" class="act act-reflect">
@@ -1226,34 +1244,6 @@
             <span class="loading">Loading domain data…</span>
         </div>
     </div>
-    <p class="section-title">Filter By Domain</p>
-    <div class="filter-bar" id="filterBar" style="margin-bottom:6px;">
-        <span class="domain-pill pill-rcbs" data-domain="RCBS" onclick="toggleDomain('RCBS')">RCBS</span>
-        <span class="domain-pill pill-rws" data-domain="RWS" onclick="toggleDomain('RWS')">RWS</span>
-        <span class="domain-pill pill-sm" data-domain="SM" onclick="toggleDomain('SM')">SM</span>
-        <span class="domain-pill pill-mts" data-domain="MTS" onclick="toggleDomain('MTS')">MTS</span>
-        <span class="domain-pill pill-eplc" data-domain="EPLC" onclick="toggleDomain('EPLC')">EPLC</span>
-        <span class="domain-pill pill-peeps" data-domain="PEEPS" onclick="toggleDomain('PEEPS')">PEEPS</span>
-        <span class="clear-filter" onclick="clearFilters()">Clear</span>
-    </div>
-
-    <p class="section-title" style="margin-top:8px;">Filter By Project</p>
-    <div class="filter-bar" id="projectBar" style="margin-bottom:1.5rem;">
-        <span class="loading">Loading projects…</span>
-    </div>
-
-    <p class="section-title">Active Projects — Set Priorities</p>
-    <div class="card" id="projects-list" style="margin-bottom:1.5rem;">
-        <p class="loading">Loading projects…</p>
-    </div>
-
-        <div id="sec-tasks">
-            <p class="section-title">Tasks — Next Two Weeks</p>
-            <div class="card" id="tasks-list">
-                <p class="loading">Loading tasks…</p>
-            </div>
-        </div>
-
     <p class="section-title">Two-Week Outlook — Calendar</p>
     <div class="card" style="margin-bottom:1.5rem;">
         <p class="week-divider" id="week1Label">Week 1</p>
@@ -1321,6 +1311,35 @@
         <p id="cal-status" style="font-size:13px;color:#888;text-align:center;padding:8px 0;">Connect RCBS and MTS calendars above to load events.</p>
         <p class="cal-source" id="cal-source">Pulls from: RCBS · MTS</p>
     </div>
+
+    <p class="section-title">Filter By Domain</p>
+    <div class="filter-bar" id="filterBar" style="margin-bottom:6px;">
+        <span class="domain-pill pill-rcbs" data-domain="RCBS" onclick="toggleDomain('RCBS')">RCBS</span>
+        <span class="domain-pill pill-rws" data-domain="RWS" onclick="toggleDomain('RWS')">RWS</span>
+        <span class="domain-pill pill-sm" data-domain="SM" onclick="toggleDomain('SM')">SM</span>
+        <span class="domain-pill pill-mts" data-domain="MTS" onclick="toggleDomain('MTS')">MTS</span>
+        <span class="domain-pill pill-eplc" data-domain="EPLC" onclick="toggleDomain('EPLC')">EPLC</span>
+        <span class="domain-pill pill-peeps" data-domain="PEEPS" onclick="toggleDomain('PEEPS')">PEEPS</span>
+        <span class="clear-filter" onclick="clearFilters()">Clear</span>
+    </div>
+
+    <p class="section-title" style="margin-top:8px;">Filter By Project</p>
+    <div class="filter-bar" id="projectBar" style="margin-bottom:1.5rem;">
+        <span class="loading">Loading projects…</span>
+    </div>
+
+    <p class="section-title">Active Projects — Set Priorities</p>
+    <div class="card" id="projects-list" style="margin-bottom:1.5rem;">
+        <p class="loading">Loading projects…</p>
+    </div>
+
+        <div id="sec-tasks">
+            <p class="section-title">Tasks — Next Two Weeks</p>
+            <div class="card" id="tasks-list">
+                <p class="loading">Loading tasks…</p>
+            </div>
+        </div>
+
 
     <div id="sec-plan">
         <p class="section-title">Plan Ahead — Next Two Weeks</p>
@@ -1484,7 +1503,10 @@
         statusEl.style.display = 'block';
         statusEl.textContent = 'Loading calendar events…';
         allCalEvents = [];
-        const timeMin = DATES.w1s.toISOString();
+        const reviewStart = new Date(DATES.weekEnd);
+        reviewStart.setDate(DATES.weekEnd.getDate() - 6);
+        reviewStart.setHours(0, 0, 0, 0);
+        const timeMin = reviewStart.toISOString();
         const timeMax = DATES.w2e.toISOString();
 
         // Load RCBS calendar
@@ -1537,14 +1559,23 @@
     }
 
     function renderCalendar(events) {
+        const reviewStart = new Date(DATES.weekEnd);
+        reviewStart.setDate(DATES.weekEnd.getDate() - 6);
+        const rlbl = document.getElementById('calReviewLabel');
+        if (rlbl) rlbl.textContent = 'This week · ' + formatDate(reviewStart) + ' – ' + formatDate(DATES.weekEnd);
         [{
+            id: 'cal-review',
+            start: reviewStart
+        }, {
             id: 'cal-week1',
             start: DATES.w1s
         }, {
             id: 'cal-week2',
             start: DATES.w2s
         }].forEach(({id, start}) => {
-            document.getElementById(id).querySelectorAll('.cal-day').forEach((dayEl, i) => {
+            const grid = document.getElementById(id);
+            if (!grid) return;
+            grid.querySelectorAll('.cal-day').forEach((dayEl, i) => {
                 const d = new Date(start);
                 d.setDate(start.getDate() + i);
                 dayEl.querySelector('.cal-day-label').textContent = d.toLocaleDateString('en-US', {
@@ -1953,6 +1984,62 @@
         const win = _planWindow === 'nexttwo' ? w.nexttwo : w.nextweek;
         renderDomainLoad(_allTasks, win[0], win[1], 'dist-bar-plan', 'dist-legend-plan');
     }
+    function renderCompleted() {
+        const el = document.getElementById('completed-list');
+        if (!el) return;
+        const w = distWindows().thisweek;
+        const done = (_allTasks || []).filter(t => {
+            const c = getCompletedDate(t);
+            return c && c >= w[0] && c <= w[1];
+        });
+        if (!done.length) {
+            el.innerHTML = '<p class="empty">Nothing marked complete this week yet.</p>';
+            return;
+        }
+        el.innerHTML = done.map(t => {
+            const domain = getTaskDomain(t) || '?';
+            const c = getCompletedDate(t);
+            const dateStr = c ? c.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+            return `
+        <div class="task-row" data-domain="${domain}">
+          <div class="task-check checked" style="cursor:default;"></div>
+          <div style="flex:1;">
+            <p class="task-name" style="text-decoration:line-through;opacity:0.7;">${getTitle(t)}</p>
+            <p class="task-meta">${dateStr} · ${pillHtml(domain, true)}</p>
+          </div>
+        </div>`;
+        }).join('');
+    }
+    async function renderLastWeekReview() {
+        const el = document.getElementById('lastweek-review');
+        if (!el) return;
+        try {
+            const f = await weeklyFieldMap();
+            const lastEnd = new Date(DATES.weekEnd);
+            lastEnd.setDate(DATES.weekEnd.getDate() - 7);
+            const lastISO = isoDate(lastEnd);
+            const records = await notionQuery(DB_WEEKLY, null);
+            const rec = records.find(r => {
+                const d = f.date && r.properties[f.date]?.date?.start;
+                return d && d.slice(0, 10) === lastISO;
+            });
+            if (!rec) { el.innerHTML = '<p class="empty">No review found for last week.</p>'; return; }
+            const read = key => f[key] ? rtRead(rec.properties[f[key]]) : '';
+            const theme = read('theme');
+            const goals = [['RCBS', 'rcbs'], ['RWS', 'rws'], ['SM', 'sm'], ['MTS', 'mts'], ['EPLC', 'eplc'], ['PEEPS', 'peeps']];
+            let html = '';
+            if (theme) html += `<p style="margin:0 0 12px;font-size:14px;"><strong>Intention:</strong> ${theme}</p>`;
+            const items = goals.filter(([l, k]) => read(k)).map(([l, k]) =>
+                `<div style="display:flex;gap:8px;align-items:baseline;margin-bottom:6px;font-size:13px;">
+                   <span class="domain-pill pill-${k}" style="flex-shrink:0;">${l}</span>
+                   <span>${read(k)}</span>
+                 </div>`).join('');
+            html += items;
+            el.innerHTML = (theme || items) ? html : '<p class="empty">Last week\'s review was left blank.</p>';
+        } catch (e) {
+            el.innerHTML = `<p class="error-msg">⚠️ Could not load last week's review: ${e.message}</p>`;
+        }
+    }
 
     // ─── RENDER TASKS ─────────────────────────────────────────
     function renderTasks(pages, projectMap) {
@@ -2031,6 +2118,31 @@
         throw new Error('No checkbox property found in Tasks database');
     }
 
+    let _tasksCompletedKey;
+    async function getTasksCompletedKey() {
+        if (_tasksCompletedKey !== undefined) return _tasksCompletedKey;
+        const res = await fetch(`${PROXY}/databases/${DB_TASKS}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', 'Notion-Version': '2022-06-28' }
+        });
+        if (!res.ok) throw new Error('Tasks schema error ' + res.status);
+        const db = await res.json();
+        _tasksCompletedKey = null;
+        for (const [name, prop] of Object.entries(db.properties)) {
+            if (prop.type === 'date' && name.toLowerCase().includes('complet')) { _tasksCompletedKey = name; break; }
+        }
+        return _tasksCompletedKey;
+    }
+    function getCompletedDate(page) {
+        for (const key of Object.keys(page.properties)) {
+            if (key.toLowerCase().includes('complet')) {
+                const d = page.properties[key];
+                if (d?.type === 'date' && d.date?.start) return new Date(d.date.start);
+            }
+        }
+        return null;
+    }
+
     function bumpTaskMetric(row, delta) {
         const id = row.classList.contains('carried-row') ? 'metric-overdue' : 'metric-tasks';
         const el = document.getElementById(id);
@@ -2044,7 +2156,10 @@
         if (checkEl.classList.contains('checked')) return; // already done
         try {
             const key = await getTasksCheckboxKey();
-            await notionPatch(pageId, { [key]: { checkbox: true } });
+            const ckey = await getTasksCompletedKey();
+            const props = { [key]: { checkbox: true } };
+            if (ckey) props[ckey] = { date: { start: isoDate(new Date()) } };
+            await notionPatch(pageId, props);
             checkEl.classList.add('checked');
             if (row) {
                 row.classList.add('task-done');
@@ -2052,7 +2167,9 @@
                 setTimeout(() => { row.style.display = 'none'; }, 320);
                 showUndo('Task completed', async () => {
                     try {
-                        await notionPatch(pageId, { [key]: { checkbox: false } });
+                        const undoProps = { [key]: { checkbox: false } };
+                        if (ckey) undoProps[ckey] = { date: null };
+                        await notionPatch(pageId, undoProps);
                         row.style.display = '';
                         row.classList.remove('task-done');
                         checkEl.classList.remove('checked');
@@ -2622,24 +2739,37 @@
     }
 
     // Isolated from the main panels: a tag failure shows only inside the tag block.
+    let _tagNotes = [];
+    let _tagWindow = 'thisweek';
+    function setTagWindow(win, el) {
+        _tagWindow = win;
+        document.querySelectorAll('#tag-filter .seg').forEach(s => s.classList.toggle('active', s === el));
+        renderTagList();
+    }
+    function renderTagList() {
+        const el = document.getElementById('tags-list');
+        if (!el) return;
+        if (!notesTagKey) {
+            el.innerHTML = '<p class="error-msg">⚠️ No relation to the Tags DB found on Notes.</p>';
+            return;
+        }
+        const w = getTagWindows();
+        const win = w[_tagWindow];
+        renderTagPanel('tags-list', tagCountsForWindow(_tagNotes, notesTagKey, win[0], win[1]));
+    }
     async function renderTagPulse(notes) {
-        const panels = ['tags-thisweek', 'tags-lastweek', 'tags-thismonth'];
+        _tagNotes = notes;
         try {
             if (!tagsLoaded) await loadTags();
             if (!notesTagKey)
                 throw new Error('No relation to the Tags DB found on Notes — check DB_TAGS and that the Notes relation points to it.');
             if (!tagsLoaded)
                 throw new Error('Could not load the Tags database — check DB_TAGS is pasted in and connected to the integration.');
-            const w = getTagWindows();
-            renderTagPanel('tags-thisweek', tagCountsForWindow(notes, notesTagKey, w.thisweek[0], w.thisweek[1]));
-            renderTagPanel('tags-lastweek', tagCountsForWindow(notes, notesTagKey, w.lastweek[0], w.lastweek[1]));
-            renderTagPanel('tags-thismonth', tagCountsForWindow(notes, notesTagKey, w.thismonth[0], w.thismonth[1]));
+            renderTagList();
         } catch (e) {
             console.error('Tag pulse:', e);
-            panels.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = `<p class="error-msg">⚠️ ${e.message}</p>`;
-            });
+            const el = document.getElementById('tags-list');
+            if (el) el.innerHTML = `<p class="error-msg">⚠️ ${e.message}</p>`;
         }
     }
 
@@ -2666,6 +2796,8 @@
             _allTasks = tasks;
             renderReviewDist();
             renderPlanDist();
+            renderCompleted();
+            renderLastWeekReview();
             const inbox = notes.filter(p => {
                 const s = (getStatus(p) || '').toUpperCase();
                 return s === 'INBOX' || s === 'ACTIVE';
@@ -2676,7 +2808,7 @@
             prefillWeekly();
         } catch (e) {
             console.error(e);
-            ['projects-list', 'tasks-list', 'notes-list', 'overdue-list'].forEach(id => {
+            ['projects-list', 'projects-list-review', 'tasks-list', 'notes-list', 'overdue-list', 'completed-list', 'lastweek-review'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el)
                     el.innerHTML = `<p class="error-msg">⚠️ Could not connect to Notion: ${e.message}</p>`;

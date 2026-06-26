@@ -1687,19 +1687,39 @@
         return null;
     }
 
+    let projectDomainMap = {};
     function getTaskDomain(page) {
+        // 1) A rollup named with 'domain' or 'pillar' — read whatever value type it carries
         for (const key of Object.keys(page.properties)) {
             const p = page.properties[key];
-            if (p.type === 'rollup' && key.toLowerCase().includes('domain')) {
-                if(p.rollup?.array?.length) {
-                    for (const item of p.rollup.array) {
-                        if (item.type === 'title'&&item.title?.length)
-                            return item.title[0].plain_text;
-                        if (item.type === 'rich_text'&&item.rich_text?.length)
-                            return item.rich_text[0].plain_text;
+            const k = key.toLowerCase();
+            if (p.type === 'rollup' && (k.includes('domain') || k.includes('pillar'))) {
+                const arr = p.rollup?.array || [];
+                for (const item of arr) {
+                    if (item.type === 'title' && item.title?.length) return item.title[0].plain_text;
+                    if (item.type === 'rich_text' && item.rich_text?.length) return item.rich_text[0].plain_text;
+                    if (item.type === 'select' && item.select?.name) return item.select.name;
+                    if (item.type === 'multi_select' && item.multi_select?.length) return item.multi_select[0].name;
+                    if (item.type === 'relation' && item.relation?.length) {
+                        const d = domainMap[item.relation[0].id];
+                        if (d) return d;
                     }
                 }
             }
+        }
+        // 2) Fall back: resolve through the task's linked project's domain
+        const projId = getTaskProjectId(page);
+        if (projId && projectDomainMap[projId]) return projectDomainMap[projId];
+        // Diagnostic (first 3 only): show why this task's domain didn't resolve
+        if (window._domDiag === undefined) window._domDiag = 0;
+        if (window._domDiag < 3) {
+            window._domDiag++;
+            const types = {};
+            for (const key of Object.keys(page.properties)) types[key] = page.properties[key].type;
+            console.warn('Unresolved task domain →', getTitle(page),
+                '| linked project id:', projId,
+                '| in projectDomainMap:', projId ? !!projectDomainMap[projId] : 'n/a',
+                '| property types:', types);
         }
         return null;
     }
@@ -2790,6 +2810,8 @@
             const projectMap = {};
             projects.forEach(p => {
                 projectMap[p.id] = getTitle(p);
+                const d = getProjectDomain(p);
+                if (d) projectDomainMap[p.id] = d;
             });
             renderProjects(projects);
             renderTasks(tasks, projectMap);

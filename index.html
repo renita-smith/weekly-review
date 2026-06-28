@@ -1015,10 +1015,13 @@
     }
 
     .week-nav-indicator {
-        font-size: 12px;
+        font-size: 11px;
         color: #666;
-        min-width: 84px;
+        min-width: 92px;
         text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 500;
     }
 
     .week-nav-indicator.off-current {
@@ -1027,13 +1030,16 @@
     }
 
     .week-nav-today {
-        font-size: 11px;
+        font-size: 10px;
         padding: 5px 12px;
         border-radius: 6px;
         border: 0.5px solid #1a1a1a;
         background: #1a1a1a;
         color: #fff;
         cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 500;
         transition: background 0.15s;
     }
 
@@ -2005,7 +2011,7 @@
         const res = await fetch(`${PROXY}/databases/${DB_PROJECTS}`, {
             headers: { 'Notion-Version': '2022-06-28' }
         });
-        if (!res.ok) throw new Error('Projects schema error ' + res.status);
+        if (!res.ok) throw await notionErr(res, 'Projects schema error');
         const db = await res.json();
         for (const [name, prop] of Object.entries(db.properties)) {
             if (prop.type === 'checkbox') { _projectsCheckboxKey = name; return name; }
@@ -2252,7 +2258,7 @@
             method: 'GET',
             headers: { 'Content-Type': 'application/json', 'Notion-Version': '2022-06-28' }
         });
-        if (!res.ok) throw new Error('Tasks schema error ' + res.status);
+        if (!res.ok) throw await notionErr(res, 'Tasks schema error');
         const db = await res.json();
         for (const [name, prop] of Object.entries(db.properties)) {
             if (prop.type === 'checkbox') { _tasksCheckboxKey = name; return name; }
@@ -2267,7 +2273,7 @@
             method: 'GET',
             headers: { 'Content-Type': 'application/json', 'Notion-Version': '2022-06-28' }
         });
-        if (!res.ok) throw new Error('Tasks schema error ' + res.status);
+        if (!res.ok) throw await notionErr(res, 'Tasks schema error');
         const db = await res.json();
         _tasksCompletedKey = null;
         for (const [name, prop] of Object.entries(db.properties)) {
@@ -2590,7 +2596,7 @@
             }
         });
         if (!res.ok)
-            throw new Error('Notion schema error ' + res.status);
+            throw await notionErr(res, 'Notion schema error');
         _notesSchema = await res.json();
         return _notesSchema;
     }
@@ -2654,7 +2660,7 @@
             method: 'GET',
             headers: { 'Content-Type': 'application/json', 'Notion-Version': '2022-06-28' }
         });
-        if (!res.ok) throw new Error('Weekly schema error ' + res.status);
+        if (!res.ok) throw await notionErr(res, 'Weekly schema error');
         _weeklySchema = await res.json();
         return _weeklySchema;
     }

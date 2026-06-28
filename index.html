@@ -2886,18 +2886,18 @@
     }
 
     function getTagWindows() {
-        const now = new Date();
-        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const thisWeekStart = new Date(startOfToday);
-        thisWeekStart.setDate(startOfToday.getDate() - now.getDay()); // week starts Sunday, matching the dashboard
-        const lastWeekStart = new Date(thisWeekStart);
-        lastWeekStart.setDate(thisWeekStart.getDate() - 7);
-        const lastWeekEnd = new Date(thisWeekStart.getTime() - 1); // ends just before this week begins (no overlap)
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        // Anchored to the dashboard's displayed review week, so the Tag Station's
+        // "This Week" matches the Notes Station and follows the week-nav.
+        const tw = distWindows().thisweek;               // [weekStart Sun 00:00, weekEnd Sat 23:59]
+        const wkStart = tw[0], wkEnd = tw[1];
+        const lastStart = new Date(wkStart); lastStart.setDate(wkStart.getDate() - 7);
+        const lastEnd = new Date(wkStart.getTime() - 1); // ends just before this week begins (no overlap)
+        const monthStart = new Date(wkStart.getFullYear(), wkStart.getMonth(), 1);
+        const monthEnd = new Date(wkStart.getFullYear(), wkStart.getMonth() + 1, 0, 23, 59, 59, 999);
         return {
-            thisweek: [thisWeekStart, now],
-            lastweek: [lastWeekStart, lastWeekEnd],
-            thismonth: [monthStart, now]
+            thisweek: [wkStart, wkEnd],
+            lastweek: [lastStart, lastEnd],
+            thismonth: [monthStart, monthEnd]
         };
     }
 
@@ -2987,6 +2987,8 @@
         renderLastWeekReview();
         // Notes re-group to the displayed week so the "This Week" filter follows the nav.
         renderNotes(notesForView());
+        // Tag Station windows are anchored to the displayed week too — refresh its panel.
+        if (tagsLoaded) renderTagList();
         // Reflection/plan boxes follow the week on screen: clear, then fill from
         // that week's record if one exists (saving stays explicit, so nothing is lost silently).
         ['ref-needle', 'ref-didnt', 'ref-carry', 'plan-theme',

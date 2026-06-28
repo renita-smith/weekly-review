@@ -1281,7 +1281,7 @@
     <div id="sec-inbox">
         <p class="section-title">Note Station — Process &amp; Assign <span id="inbox-count" class="inbox-count"></span></p>
         <div class="inbox-filter">
-            <button class="seg" data-filter="ALL" onclick="setInboxFilter('ALL', this)">All</button>
+            <button class="seg" data-filter="THISWEEK" onclick="setInboxFilter('THISWEEK', this)">This Week</button>
             <button class="seg active" data-filter="INBOX" onclick="setInboxFilter('INBOX', this)">Inbox</button>
             <button class="seg" data-filter="ACTIVE" onclick="setInboxFilter('ACTIVE', this)">Active</button>
         </div>
@@ -2004,6 +2004,7 @@
     }
     let _allTasks = [];
     let _projectMap = {};
+    let _inboxNotes = [];
     let _planWindow = 'nextweek';
     let _projectsCheckboxKey = null;
     async function getProjectsCheckboxKey() {
@@ -2361,10 +2362,11 @@
             list.innerHTML = '<p class="empty">Inbox zero — all notes are processed.</p>';
             return;
         }
-        const now = Date.now();
-        const oneWk = 7 * 86400000;
-        const thisWk = pages.filter(p => now - noteWhen(p).getTime() <= oneWk);
-        const older = pages.filter(p => now - noteWhen(p).getTime() > oneWk);
+        const w = distWindows().thisweek;           // the same window the dashboard is showing
+        const ws = w[0].getTime(), we = w[1].getTime();
+        const inWin = p => { const t = noteWhen(p).getTime(); return t >= ws && t <= we; };
+        const thisWk = pages.filter(inWin);
+        const older = pages.filter(p => !inWin(p));
         function noteRow(p) {
             const status = (getStatus(p) || '').toUpperCase();
             const domain = getProjectDomain(p);
@@ -2378,7 +2380,7 @@
                 : [];
             const allPills = pills + tagNames.map(tagPillHtml).join('');
             return `
-      <div class="note-row" data-page-id="${p.id}" data-status="${status}">
+      <div class="note-row" data-page-id="${p.id}" data-status="${status}" data-when="${noteWhen(p).getTime()}">
         <div class="note-left">
           <div class="note-main">
             <button class="note-caret" onclick="toggleNotePreview('${p.id}', this)" title="Preview note" aria-label="Preview note">❯</button>
@@ -2428,10 +2430,19 @@
     function applyInboxFilter() {
         const list = document.getElementById('notes-list');
         if (!list) return;
+        // "THIS WEEK" filters by the dashboard's current window; the others filter by status.
+        const win = _inboxFilter === 'THISWEEK' ? distWindows().thisweek : null;
+        const ws = win ? win[0].getTime() : 0, we = win ? win[1].getTime() : 0;
         let visible = 0;
         list.querySelectorAll('.note-row').forEach(r => {
             const s = (r.dataset.status || '').toUpperCase();
-            const show = _inboxFilter === 'ALL' || s === _inboxFilter;
+            let show;
+            if (_inboxFilter === 'THISWEEK') {
+                const t = Number(r.dataset.when) || 0;
+                show = t >= ws && t <= we;
+            } else {
+                show = s === _inboxFilter;
+            }
             r.style.display = show ? '' : 'none';
             if (show) visible++;
         });
@@ -2452,7 +2463,9 @@
                 msg.className = 'empty filter-empty';
                 list.appendChild(msg);
             }
-            msg.textContent = `No ${_inboxFilter.toLowerCase()} notes.`;
+            msg.textContent = _inboxFilter === 'THISWEEK'
+                ? 'No notes added in this week\u2019s window.'
+                : `No ${_inboxFilter.toLowerCase()} notes.`;
             msg.style.display = '';
         } else if (msg) {
             msg.style.display = 'none';
@@ -2958,6 +2971,8 @@
         renderPlanDist();
         renderCompleted();
         renderLastWeekReview();
+        // Notes re-group to the displayed week so the "This Week" filter follows the nav.
+        renderNotes(_inboxNotes);
         // Reflection/plan boxes follow the week on screen: clear, then fill from
         // that week's record if one exists (saving stays explicit, so nothing is lost silently).
         ['ref-needle', 'ref-didnt', 'ref-carry', 'plan-theme',
@@ -3015,6 +3030,7 @@
                 return s === 'INBOX' || s === 'ACTIVE';
             });
             try { await loadTags(); } catch (e) { console.warn('Tags unavailable for note pills:', e.message); }
+            _inboxNotes = inbox;
             renderNotes(inbox);
             renderTagPulse(notes);
             prefillWeekly();

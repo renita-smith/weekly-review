@@ -2004,7 +2004,7 @@
     }
     let _allTasks = [];
     let _projectMap = {};
-    let _inboxNotes = [];
+    let _allNotes = [];
     let _planWindow = 'nextweek';
     let _projectsCheckboxKey = null;
     async function getProjectsCheckboxKey() {
@@ -2354,6 +2354,20 @@
     }
 
     // ─── RENDER NOTES ─────────────────────────────────────────
+    // The set the station renders: every unprocessed note (Inbox/Active, any date)
+    // PLUS anything captured inside the displayed week — including Closed and
+    // blank-status notes — so "This Week" is a complete retrospective of that window.
+    function notesForView() {
+        const w = distWindows().thisweek;
+        const ws = w[0].getTime(), we = w[1].getTime();
+        return _allNotes.filter(p => {
+            const s = (getStatus(p) || '').toUpperCase();
+            if (s === 'INBOX' || s === 'ACTIVE') return true;
+            const t = noteWhen(p).getTime();
+            return t >= ws && t <= we;
+        });
+    }
+
     function renderNotes(pages) {
         const list = document.getElementById('notes-list');
         if (!pages.length) {
@@ -2972,7 +2986,7 @@
         renderCompleted();
         renderLastWeekReview();
         // Notes re-group to the displayed week so the "This Week" filter follows the nav.
-        renderNotes(_inboxNotes);
+        renderNotes(notesForView());
         // Reflection/plan boxes follow the week on screen: clear, then fill from
         // that week's record if one exists (saving stays explicit, so nothing is lost silently).
         ['ref-needle', 'ref-didnt', 'ref-carry', 'plan-theme',
@@ -3025,13 +3039,9 @@
             renderPlanDist();
             renderCompleted();
             renderLastWeekReview();
-            const inbox = notes.filter(p => {
-                const s = (getStatus(p) || '').toUpperCase();
-                return s === 'INBOX' || s === 'ACTIVE';
-            });
             try { await loadTags(); } catch (e) { console.warn('Tags unavailable for note pills:', e.message); }
-            _inboxNotes = inbox;
-            renderNotes(inbox);
+            _allNotes = notes;
+            renderNotes(notesForView());
             renderTagPulse(notes);
             prefillWeekly();
         } catch (e) {

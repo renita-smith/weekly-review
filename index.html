@@ -989,6 +989,58 @@
         align-items: center;
     }
 
+    .week-nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+    }
+
+    .week-nav-btn {
+        width: 26px;
+        height: 26px;
+        line-height: 1;
+        font-size: 16px;
+        padding: 0;
+        border-radius: 6px;
+        border: 0.5px solid #bbb;
+        background: #fff;
+        color: #1a1a1a;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    .week-nav-btn:hover {
+        background: #f0efe9;
+    }
+
+    .week-nav-indicator {
+        font-size: 12px;
+        color: #666;
+        min-width: 84px;
+        text-align: center;
+    }
+
+    .week-nav-indicator.off-current {
+        color: #a32d2d;
+        font-weight: 600;
+    }
+
+    .week-nav-today {
+        font-size: 11px;
+        padding: 5px 12px;
+        border-radius: 6px;
+        border: 0.5px solid #1a1a1a;
+        background: #1a1a1a;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    .week-nav-today:hover {
+        background: #333;
+    }
+
     .jump-bar {
         display: flex;
         gap: 8px;
@@ -1129,6 +1181,12 @@
         <div>
             <h1>RenitaOS Weekly Review</h1>
             <p class="subtitle" id="weekLabel">Loading dates…</p>
+            <div class="week-nav">
+                <button class="week-nav-btn" onclick="shiftWeek(-1)" title="Previous week" aria-label="Previous week">‹</button>
+                <span class="week-nav-indicator" id="weekNavIndicator">This week</span>
+                <button class="week-nav-btn" onclick="shiftWeek(1)" title="Next week" aria-label="Next week">›</button>
+                <button class="week-nav-today" id="weekNavToday" onclick="goToThisWeek()" style="display:none;">Jump to this week</button>
+            </div>
         </div>
         <div class="header-btns">
             <button class="btn btn-gcal" id="gcal-btn-rcbs" onclick="handleGCalAuth('rcbs')">📅 Connect RCBS</button>
@@ -1473,11 +1531,11 @@
             day: 'numeric'
         });
     }
-    function getReviewDates() {
+    function getReviewDates(offset = 0) {
         const today = new Date();
         const day = today.getDay();
         const sat = new Date(today);
-        sat.setDate(today.getDate() + ((6 - day + 7) % 7));
+        sat.setDate(today.getDate() + ((6 - day + 7) % 7) + (offset * 7));
         const w1s = new Date(sat);
         w1s.setDate(sat.getDate() + 1);
         const w1e = new Date(w1s);
@@ -1494,10 +1552,24 @@
             w2e
         };
     }
-    const DATES = getReviewDates();
-    document.getElementById('weekLabel').textContent = 'Week ending ' + formatDate(DATES.weekEnd) + ' · Looking ahead to ' + formatDate(DATES.w2e);
-    document.getElementById('week1Label').textContent = 'Week 1 · ' + formatDate(DATES.w1s) + ' – ' + formatDate(DATES.w1e);
-    document.getElementById('week2Label').textContent = 'Week 2 · ' + formatDate(DATES.w2s) + ' – ' + formatDate(DATES.w2e);
+    let weekOffset = 0;                       // 0 = current review week; -1 = last week; etc.
+    let DATES = getReviewDates(weekOffset);
+
+    function refreshWeekLabels() {
+        document.getElementById('weekLabel').textContent = 'Week ending ' + formatDate(DATES.weekEnd) + ' · Looking ahead to ' + formatDate(DATES.w2e);
+        document.getElementById('week1Label').textContent = 'Week 1 · ' + formatDate(DATES.w1s) + ' – ' + formatDate(DATES.w1e);
+        document.getElementById('week2Label').textContent = 'Week 2 · ' + formatDate(DATES.w2s) + ' – ' + formatDate(DATES.w2e);
+        const ind = document.getElementById('weekNavIndicator');
+        if (ind) {
+            ind.textContent = weekOffset === 0 ? 'This week'
+                : weekOffset < 0 ? (-weekOffset === 1 ? '1 week back' : (-weekOffset) + ' weeks back')
+                : (weekOffset === 1 ? '1 week ahead' : weekOffset + ' weeks ahead');
+            ind.classList.toggle('off-current', weekOffset !== 0);
+        }
+        const todayBtn = document.getElementById('weekNavToday');
+        if (todayBtn) todayBtn.style.display = weekOffset === 0 ? 'none' : '';
+    }
+    refreshWeekLabels();
 
     // ─── GOOGLE CALENDAR — TWO ACCOUNTS ──────────────────────
     let rcbsToken = null;
@@ -1635,6 +1707,19 @@
     }
 
     // ─── NOTION API ───────────────────────────────────────────
+    // Reads Notion's response body so a failure shows the REAL reason
+    // (e.g. "content.length should be ≤ 2000") instead of a bare status code.
+    async function notionErr(res, label) {
+        let detail = '';
+        try {
+            const j = await res.json();
+            detail = j.message || j.code || JSON.stringify(j);
+        } catch (_) {}
+        const err = new Error(`${label} ${res.status}${detail ? ' — ' + detail : ''}`);
+        err.status = res.status;
+        return err;
+    }
+
     async function notionQuery(dbId, filter, sorts) {
         // Loops on has_more / next_cursor so we fetch ALL rows, not just the first 100.
         let results = [];
@@ -1653,7 +1738,7 @@
                 body: JSON.stringify(body),
             });
             if (!res.ok)
-                throw new Error('Notion API error ' + res.status);
+                throw await notionErr(res, 'Notion API error');
             const data = await res.json();
             results = results.concat(data.results || []);
             cursor = data.has_more ? data.next_cursor : undefined;
@@ -1678,7 +1763,7 @@
             body: JSON.stringify(payload),
         });
         if (!res.ok)
-            throw new Error('Notion create error ' + res.status);
+            throw await notionErr(res, 'Notion create error');
         return res.json();
     }
     async function notionPatch(pageId, properties) {
@@ -1693,7 +1778,7 @@
             }),
         });
         if (!res.ok)
-            throw new Error('Notion patch error ' + res.status);
+            throw await notionErr(res, 'Notion patch error');
         return res.json();
     }
 
@@ -1912,6 +1997,7 @@
         document.querySelectorAll('#projects-list .project-row[data-domain],#tasks-list .task-row[data-domain],#projects-list .progress-wrap').forEach(r => r.classList.remove('hidden'));
     }
     let _allTasks = [];
+    let _projectMap = {};
     let _planWindow = 'nextweek';
     let _projectsCheckboxKey = null;
     async function getProjectsCheckboxKey() {
@@ -2115,14 +2201,21 @@
     function renderTasks(pages, projectMap) {
         const list = document.getElementById('tasks-list');
         const attnEl = document.getElementById('overdue-list');
-        const now = new Date();
-        const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
-        const weekEndSat = new Date(DATES.weekEnd); weekEndSat.setHours(23, 59, 59, 999);
-        const twoWks = new Date(); twoWks.setDate(now.getDate() + 14);
 
-        const upcoming = pages.filter(p => { const d = getDueDate(p); return d && d >= now && d <= twoWks; });
-        const dueThisWeek = pages.filter(p => { const d = getDueDate(p); return d && d >= startToday && d <= weekEndSat; });
-        const overdue = pages.filter(p => { const d = getDueDate(p); return d && d < startToday; });
+        // Exclude finished tasks so completed work never resurfaces here. (Bug 2)
+        const active = (pages || []).filter(p => !isTaskDone(p));
+
+        const weekEndSat = new Date(DATES.weekEnd); weekEndSat.setHours(23, 59, 59, 999);
+        const weekStart = new Date(DATES.weekEnd); weekStart.setDate(DATES.weekEnd.getDate() - 6); weekStart.setHours(0, 0, 0, 0);
+        // Pivot on real "today" when the live week is shown; otherwise pivot on the
+        // displayed week's start, so stepping back to a slipped week stays coherent. (Bug 3)
+        const todayMid = new Date(); todayMid.setHours(0, 0, 0, 0);
+        const pivot = (todayMid >= weekStart && todayMid <= weekEndSat) ? todayMid : weekStart;
+        const twoWks = new Date(pivot); twoWks.setDate(pivot.getDate() + 14); twoWks.setHours(23, 59, 59, 999);
+
+        const upcoming = active.filter(p => { const d = getDueDate(p); return d && d >= pivot && d <= twoWks; });
+        const dueThisWeek = active.filter(p => { const d = getDueDate(p); return d && d >= pivot && d <= weekEndSat; });
+        const overdue = active.filter(p => { const d = getDueDate(p); return d && d < pivot; });
 
         document.getElementById('metric-tasks').textContent = dueThisWeek.length;
         document.getElementById('metric-overdue').textContent = overdue.length;
@@ -2190,6 +2283,28 @@
             }
         }
         return null;
+    }
+
+    // True if a task should be treated as finished and kept OUT of the attention lists.
+    // Catches tasks completed via this dashboard (checkbox + completed-date) AND tasks
+    // closed directly in Notion (done-style status, or progress at 100%).
+    function isTaskDone(page) {
+        // 1) The "done" checkbox — the first checkbox in the Tasks DB, same one markTaskDone sets.
+        for (const key of Object.keys(page.properties)) {
+            const p = page.properties[key];
+            if (p.type === 'checkbox') {
+                if (p.checkbox === true) return true;
+                break; // only the primary checkbox counts as "done"
+            }
+        }
+        // 2) A completion date is filled in.
+        if (getCompletedDate(page)) return true;
+        // 3) Status name reads as complete.
+        const s = (getStatus(page) || '').toLowerCase();
+        if (/(done|complete|closed|finished|✅|✔)/.test(s)) return true;
+        // 4) Progress reached 100%.
+        if (getProgress(page) >= 100) return true;
+        return false;
     }
 
     function bumpTaskMetric(row, delta) {
@@ -2578,7 +2693,15 @@
         return `${d.getFullYear()}-${m}-${day}`;
     }
     function rtVal(text) {
-        return { rich_text: text ? [{ text: { content: text } }] : [] };
+        // Notion rejects any single rich_text chunk over 2000 chars (400 error).
+        // Split long reflections into multiple chunks; they re-join seamlessly on read.
+        if (!text) return { rich_text: [] };
+        const MAX = 2000;
+        const parts = [];
+        for (let i = 0; i < text.length; i += MAX) {
+            parts.push({ text: { content: text.slice(i, i + MAX) } });
+        }
+        return { rich_text: parts };
     }
     function rtRead(prop) {
         return (prop && prop.rich_text ? prop.rich_text : []).map(r => r.plain_text).join('');
@@ -2822,6 +2945,37 @@
         }
     }
 
+    // ─── WEEK NAVIGATION (step back to a slipped review, or peek ahead) ───
+    function rerenderForWeek() {
+        renderTasks(_allTasks, _projectMap);
+        renderReviewDist();
+        renderPlanDist();
+        renderCompleted();
+        renderLastWeekReview();
+        // Reflection/plan boxes follow the week on screen: clear, then fill from
+        // that week's record if one exists (saving stays explicit, so nothing is lost silently).
+        ['ref-needle', 'ref-didnt', 'ref-carry', 'plan-theme',
+         'plan-rcbs', 'plan-rws', 'plan-sm', 'plan-mts', 'plan-eplc', 'plan-peeps']
+            .forEach(id => setBox(id, ''));
+        prefillWeekly();
+        // Calendar window moves too — refetch if connected, else just relabel the day grid.
+        if (rcbsToken || mtsToken) loadAllCalendarEvents();
+        else renderCalendar(allCalEvents);
+    }
+    function shiftWeek(delta) {
+        weekOffset += delta;
+        DATES = getReviewDates(weekOffset);
+        refreshWeekLabels();
+        rerenderForWeek();
+    }
+    function goToThisWeek() {
+        if (weekOffset === 0) return;
+        weekOffset = 0;
+        DATES = getReviewDates(0);
+        refreshWeekLabels();
+        rerenderForWeek();
+    }
+
     async function init() {
         buildHabitDots();
         try {
@@ -2845,6 +2999,7 @@
             renderProjects(projects);
             renderTasks(tasks, projectMap);
             _allTasks = tasks;
+            _projectMap = projectMap;
             renderReviewDist();
             renderPlanDist();
             renderCompleted();
